@@ -1,0 +1,14 @@
+{
+  "name": "zhaopin-uni-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dxx",
+  "license": "ISC",
+  "dependencies": {
+    "jweixin-module": "^1.6.0"
+  }
+}
