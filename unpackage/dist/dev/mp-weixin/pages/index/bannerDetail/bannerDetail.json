@@ -1,7 +1,0 @@
-{
-  "navigationBarTitleText": "悦众科技",
-  "enablePullDownRefresh": false,
-  "usingComponents": {
-    "uni-nav-bar": "/uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar"
-  }
-}
