@@ -135,18 +135,18 @@
 											</style>
 									</script>
 									<script type="text/wxtag-template">
-										<div class="text">下班签到</div>
+										<div class="text">下班签退</div>
 									</script>
 								</wx-open-subscribe>
 							</template>
 							<template v-else>
-								<text @click="signInOut(2)">下班签到</text>
+								<text @click="signInOut(2)">下班签退</text>
 							</template>
 							<!-- #endif -->
 							
 							<!-- 非H5 -->
 							<!-- #ifndef H5 -->
-							<text @click="signInOut(2)">下班签到</text>
+							<text @click="signInOut(2)">下班签退</text>
 							<!-- #endif -->
 						</view>
 					</view>
@@ -233,6 +233,7 @@
 			this.id = option.id;
 			this.initDetail(option.id);
 		},
+	
 		methods: {
 			goBack() {
 				uni.navigateBack({
@@ -344,27 +345,49 @@
 				// #ifdef MP-WEIXIN
 				signtype = 2;
 				// #endif
-				this.$api.sign({
-					token:uni.getStorageSync('user_token'),
-					id:this.id,
-					longitude:this.info.longitude,
-					latitude:this.info.latitude,
-					sign_type:type,
-					signtype:signtype,
-				}).then(res=>{
-					if(res.code == 0){
-						uni.showToast({
-							title: '签到成功',
-							icon: 'success'
-						});
-						this.initDetail(this.id);
-					}else{
-						uni.showToast({
-							title: res.msg,
-							icon: 'none'
-						});
+				
+				var sign_title = "";
+				if(type == 1){ // 签到
+					sign_title = "签到";
+				}else if(type == 2){ // 签退
+					sign_title = "签退";
+				}
+				
+				uni.showModal({
+					title: '温馨提示',
+					content: '请确认是否' + sign_title,
+					confirmText: '确定',
+					cancelText: '取消',
+					success: (modal_res) => {
+						if (modal_res.confirm) {
+							// 调签到的接口
+							this.$api.sign({
+								token:uni.getStorageSync('user_token'),
+								id:this.id,
+								longitude:this.info.longitude,
+								latitude:this.info.latitude,
+								sign_type:type,
+								signtype:signtype,
+							}).then(res=>{
+								if(res.code == 0){
+									uni.showToast({
+										title: sign_title + '成功',
+										icon: 'success'
+									});
+									this.initDetail(this.id);
+								}else{
+									uni.showToast({
+										title: res.msg,
+										icon: 'none'
+									});
+								}
+							});
+						} else if (modal_res.cancel) {
+							console.log('关闭');
+						}
 					}
 				});
+				
 			},
 			
 			// 取消报名

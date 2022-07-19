@@ -34,7 +34,11 @@
 			<template v-else>
 				<span class="bg-primary-600 fs_16 no-auth-btn" @click="goAuth">请点击登录</span>
 			</template>
-			
+		</view>
+		
+		<!-- 返回首页 -->
+		<view class="backHome bg-primary-600 d-flex align-items-center justify-content-center p-2" @click="goHome">
+			<uni-icons type="home-filled" size="26" color="#FFFFFF"></uni-icons>
 		</view>
 	</view>
 </template>
@@ -43,6 +47,7 @@
 	export default {
 		data() {
 			return {
+				user_token:"",
 				lists:[],
 				currentPage:1,
 				pageSize:5,
@@ -51,12 +56,22 @@
 			}
 		},
 		onLoad(options){
+	
+		},
+		onShow(options){
 			this.user_token = uni.getStorageSync('user_token');
 			if(this.user_token){
 				this.getBalance(this.user_token);
 			}
 		},
 		methods: {
+			// 跳转首页
+			goHome(){
+				uni.reLaunch({
+					url: "/pages/index/index",
+				})
+			},
+			
 			// 跳转授权页面
 			goAuth(){
 				uni.navigateTo({

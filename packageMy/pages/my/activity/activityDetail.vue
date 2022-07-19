@@ -660,37 +660,52 @@
 					icon: 'loading',
 					duration: 3000,
 				})
-				var images = "",back_images = "";
+				var images = "",back_images = "",sign_title = "";
 				if(this.signForm.type == 1){ // 签到
 					images = this.signForm.images.join(",");
 					back_images = "";
+					sign_title = "签到";
 				}else if(this.signForm.type == 2){ // 签退
 					images = "";
 					back_images = this.signForm.images.join(",");
+					sign_title = "签退";
 				}
 				
-				this.$api.activitySign_replace({
-					token:uni.getStorageSync('user_token'),
-					sn:this.sn,
-					id:this.signForm.signId,
-					date:this.signForm.date,
-					sign_type:this.signForm.type,
-					signtype:signtype,
-					images:images,
-					back_images:back_images,
-				}).then(res=>{
-					if(res.code == 0){
-						uni.showToast({
-							title: '签到成功',
-							icon: 'success'
-						});
-						this.$refs.signPopup.close();
-						this.search();
-					}else{
-						uni.showToast({
-							title: res.msg,
-							icon: 'none'
-						});
+				uni.showModal({
+					title: '温馨提示',
+					content: '请确认是否' + sign_title,
+					confirmText: '确定',
+					cancelText: '取消',
+					success: (modal_res) => {
+						if (modal_res.confirm) {
+							// 调代替签到的接口
+							this.$api.activitySign_replace({
+								token:uni.getStorageSync('user_token'),
+								sn:this.sn,
+								id:this.signForm.signId,
+								date:this.signForm.date,
+								sign_type:this.signForm.type,
+								signtype:signtype,
+								images:images,
+								back_images:back_images,
+							}).then(res=>{
+								if(res.code == 0){
+									uni.showToast({
+										title: sign_title + '成功',
+										icon: 'success'
+									});
+									this.$refs.signPopup.close();
+									this.search();
+								}else{
+									uni.showToast({
+										title: res.msg,
+										icon: 'none'
+									});
+								}
+							});
+						} else if (modal_res.cancel) {
+							console.log('关闭');
+						}
 					}
 				});
 			},

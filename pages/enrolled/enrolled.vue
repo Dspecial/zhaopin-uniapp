@@ -82,6 +82,9 @@
 			}
 		},
 		onLoad(){
+			
+		},
+		onShow(){
 			this.user_token = uni.getStorageSync('user_token');
 			if(uni.getStorageSync('enrolled_activeTab')){
 				this.currentTab = uni.getStorageSync('enrolled_activeTab');
@@ -94,9 +97,6 @@
 			if(this.user_token){
 				this.onClickItem(eObj);
 			}
-		},
-		onshow(){
-			
 		},
 		methods: {
 			// 跳转授权页面

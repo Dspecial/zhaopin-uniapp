@@ -23,7 +23,7 @@
 	}
 	.my-btn{
 		padding: 20rpx 80rpx;
-		border-radius: 40rpx;
+		border-radius: 60rpx;
 		border: 0;
 	}
 	.text-white{
@@ -850,6 +850,13 @@
 	right: inherit;
 	bottom: inherit;
 	left: inherit;
+}
+
+.backHome{
+	position: fixed;
+	right: 30rpx;
+	bottom: 80rpx;
+	border-radius: 50%;
 }
 
 

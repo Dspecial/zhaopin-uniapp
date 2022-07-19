@@ -1,5 +1,5 @@
 {
-    "name" : "yuezhongzhaopin",
+    "name" : "悦众招聘",
     "appid" : "__UNI__3836C0E",
     "description" : "",
     "versionName" : "1.0.0",
@@ -43,7 +43,6 @@
     "quickapp" : {},
     /* 快应用特有相关 */
     "mp-weixin" : {
-        /* 小程序特有相关 */
         "appid" : "wx34177f67646e289c",
         "setting" : {
             "urlCheck" : false

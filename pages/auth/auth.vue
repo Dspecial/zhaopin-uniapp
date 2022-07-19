@@ -7,21 +7,32 @@
 		<view class="p-3">
 			<image class="image about-logo-image" :src="logo" mode="aspectFit" />
 			<view class="d-flex justify-content-center mt-5">
+				<!-- #ifdef MP-WEIXIN -->
 				<text class="bg-primary-600 fs_18 auth-btn" @click="getUserInfo">授权登录</text>
+				<!-- #endif -->
+				
+				<!-- #ifdef H5 -->
+				<template v-if="!isWeChat">
+					<text class="bg-primary-600 fs_18 auth-btn" @click="getUserInfo">授权登录</text>
+				</template>
+				<!-- #endif -->
 			</view>
 		</view>
 	</view>
 </template>
 
 <script>
+	let App = getApp();
 	export default {
 		data() {
 			return {
 				authBg: require("@/static/my_navbar_auth.png"),
 				logo: require("@/static/uni.png"),
+				isWeChat:App.globalData.isWeChat,
 			}
 		},
 		onLoad(){
+			this.initLogo();
 			// #ifdef H5
 			// 判断H5是微信还是pc
 			let ua = navigator.userAgent.toLowerCase();
@@ -59,6 +70,22 @@
 			// #endif
 		},
 		methods: {
+			// 获取logo
+			initLogo(){
+				this.$api.aboutUs({
+					name: 'logo',
+				}).then(res=>{
+					if(res.code == 0){
+						this.logo = this.$globalUrl.baseUrl + res.data.value;
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
 			// 授权
 			getUserInfo:function(){
 				// #ifdef MP-WEIXIN
@@ -153,9 +180,9 @@
 					if(authRes.code == 0){
 						uni.setStorageSync('user_token',authRes.data);
 						var beforePageFullPath = uni.getStorageSync('beforePageFullPath');
-						uni.reLaunch({
-							url: beforePageFullPath,
-						})
+						console.log(beforePageFullPath,'beforePageFullPathbeforePageFullPath');
+						var url_g = window.location.href.split("?")[0];
+						window.location.href = url_g + "#" + beforePageFullPath;
 					}else{
 						uni.showToast({
 							title: authres.msg,

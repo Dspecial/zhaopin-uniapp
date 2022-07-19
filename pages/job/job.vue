@@ -68,6 +68,9 @@
 			}
 		},
 		onLoad(){
+			
+		},
+		onShow(){
 			if(uni.getStorageSync('job_activeTab')){
 				this.currentTab = uni.getStorageSync('job_activeTab');
 			}else{

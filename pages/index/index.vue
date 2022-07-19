@@ -141,6 +141,9 @@
 			}
 		},
 		onLoad() {
+			
+		},
+		onShow(){
 			if(uni.getStorageSync('city_name')){
 				this.city_id = uni.getStorageSync('city_id');
 				this.city_name = uni.getStorageSync('city_name');
@@ -151,9 +154,6 @@
 			}else{
 				this.getLocation();
 			}
-		},
-		onShow(){
-			
 		},
 		methods: {
 			// 获取当前定位

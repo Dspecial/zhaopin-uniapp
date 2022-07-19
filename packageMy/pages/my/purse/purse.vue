@@ -81,13 +81,13 @@
 			}
 		},
 		onLoad(){
+			
+		},
+		onShow(){
 			this.user_token = uni.getStorageSync('user_token');
 			if(this.user_token){
 				this.getBalance(this.user_token);
 			}
-		},
-		onShow(){
-			
 		},
 		methods: {
 			goBack() {

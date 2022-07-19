@@ -122,11 +122,17 @@
 					</view>
 				</view>
 			</view>
+			
+			<!-- 退出登录 -->
+			<view class="text-center pt-3 w-50 m-auto" v-if="user_token">
+				<view class="auth-btn bg-primary-600 fs_16" type="primary" size="mini" @click="logOut()">退出登录</view>
+			</view>
 		</view>
 	</view>
 </template>
 
 <script>
+	let App = getApp();
 	export default {
 		data() {
 			return {
@@ -171,16 +177,17 @@
 					img5: require("@/packageMy/static/my/fun_icon5.png"),
 					img6: require("@/packageMy/static/my/fun_icon6.png"),
 				},
+				isWeChat:App.globalData.isWeChat,
 			}
 		},
-		onLoad(){
+		onLoad(options){
 			this.user_token = uni.getStorageSync('user_token');
 			if(this.user_token){
 				this.getProfileInfo(this.user_token);
 			}
 		},
 		onShow(){
-			
+			this.user_token = uni.getStorageSync('user_token');
 		},
 		methods: {
 			// 跳转授权页面
@@ -419,6 +426,39 @@
 					// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
 					url: "/packageMy/pages/my/about/about",
 				})
+			},
+			
+			// 退出登录
+			logOut(){
+				uni.showModal({
+					title: '温馨提示',
+					content: '请确认是否退出',
+					confirmText: '确定',
+					cancelText: '取消',
+					success: (res) => {
+						if (res.confirm) {
+							uni.removeStorageSync('user_token');
+							uni.removeStorageSync('beforePageFullPath');
+							uni.removeStorageSync('enrolled_activeTab');
+							uni.removeStorageSync('job_activeTab');
+							this.user_token = uni.getStorageSync('user_token');
+							this.profile = {
+								avatar: require("@/static/uni.png"),
+								is_auth:"1", // 是否实名认证:1=否,2=是
+								nickname:"",
+								mobile:"",
+								balance:"0.00"
+							};
+							
+							// #ifdef H5
+							window.location.href = window.location.href;
+							// #endif
+							
+						} else if (res.cancel) {
+							console.log('关闭');
+						}
+					}
+				});
 			},
 		}
 	}
