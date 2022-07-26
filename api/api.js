@@ -120,10 +120,20 @@ export default {
 			})
 	},
 	
-	// 分享-订阅消息
+	// 分享-订阅消息-换取微信签名
 	share: (params) => {
 			return request({
 					url: "/api/base/share", // 请求url
+					method: "POST", // 请求方式
+					data: params, // 请求数据
+			})
+	},
+	
+	
+	// 分享-生成海报
+	posterShare: (params) => {
+			return request({
+					url: "/api/exercise/create_poster", // 请求url
 					method: "POST", // 请求方式
 					data: params, // 请求数据
 			})

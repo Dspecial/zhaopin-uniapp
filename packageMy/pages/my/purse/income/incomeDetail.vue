@@ -37,14 +37,16 @@
 		</view>
 		
 		<!-- 返回首页 -->
-		<view class="backHome bg-primary-600 d-flex align-items-center justify-content-center p-2" @click="goHome">
-			<uni-icons type="home-filled" size="26" color="#FFFFFF"></uni-icons>
-		</view>
+		<back-home></back-home>
 	</view>
 </template>
 
 <script>
+	import backHome from "@/components/back-home/back-home.vue"
 	export default {
+		components:{
+			backHome
+		},
 		data() {
 			return {
 				user_token:"",
@@ -65,13 +67,6 @@
 			}
 		},
 		methods: {
-			// 跳转首页
-			goHome(){
-				uni.reLaunch({
-					url: "/pages/index/index",
-				})
-			},
-			
 			// 跳转授权页面
 			goAuth(){
 				uni.navigateTo({

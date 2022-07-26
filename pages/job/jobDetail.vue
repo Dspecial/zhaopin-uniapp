@@ -80,7 +80,7 @@
 				<scroll-view class="scroll-view_H mt-3-1" scroll-x="true" @scroll="scroll" scroll-left="120">
 					<template v-for="(item,index) in applicant">
 						<view class="scroll-view-item_H pb-3-1 mr-2" :key="index">
-							<image class="image avatar-image" :src="item.avatar" mode="aspectFit" />
+							<image class="image avatar-image" :src="item.avatar" mode="aspectFill" />
 						</view>
 					</template>
 				</scroll-view>
@@ -94,10 +94,22 @@
 							<uni-icons type="headphones" size="18"></uni-icons>
 							<view>联系领队</view>
 						</view>
+						<!-- #ifdef H5 -->
 						<view class="text-center mr-3" @click="share">
 							<uni-icons type="redo-filled" size="18"></uni-icons>
 							<view>分享</view>
 						</view>
+						<!-- #endif -->
+						
+						<!-- #ifdef MP-WEIXIN -->
+						<view class="text-center mr-3 share_view">
+							<button open-type="share" class="btn-share">
+								<uni-icons type="redo-filled" size="18"></uni-icons>
+								<view>分享</view>
+							</button>
+						</view>
+						<!-- #endif -->
+						
 						<view class="text-center mr-3" @click="collect(can_collect)">
 							<uni-icons :type="can_collect == 1?'star':'star-filled'" size="18" :color="can_collect == 1?'':'#FF6549'"></uni-icons>
 							<view>{{ can_collect == 1?'收藏':'取消'}}</view>
@@ -161,13 +173,28 @@
 					@close="dialogClose">
 				</uni-popup-dialog>
 			</uni-popup>
+			
+			<!-- 海报窗口 -->
+			<uni-popup ref="posterPopup">
+				<view class="posterPopup p-3">
+					<image class="image poster-image" :src="posterImg" mode="aspectFit" />
+					<text class="mt-3 d-block fs_14">长按图片保存到相册</text>
+				</view>
+			</uni-popup>
+			
 		</view>
+		<!-- 返回首页 -->
+		<back-home></back-home>
 	</view>
 </template>
 
 <script>
 	let App = getApp();
+	import backHome from "@/components/back-home/back-home.vue"
 	export default {
+		components:{
+			backHome
+		},
 		data() {
 			return {
 				sn:"",
@@ -204,14 +231,47 @@
 				// 订阅的模板id
 				templateId:"",
 				isWeChat:App.globalData.isWeChat,
+				// 分享海报
+				posterImg:"",
 			}
 		},
 
 		onLoad:function(option){
 			// option 接受url的传参
 			this.sn = option.sn;
-			this.initDetail(option.sn);
+			if(option.signcode){
+				let items = {};
+				items[option.sn] = option.signcode;
+				let jsonitems = JSON.stringify(items);
+				uni.setStorageSync('job_signcode',jsonitems);
+			}
 		},
+		
+		// 小程序转发分享给朋友
+		onShareAppMessage(option){
+			if (option.from === 'button') { // 来自页面内分享按钮
+				// console.log(option.target)
+			}
+			return {
+				title: this.info.title,
+				path: '/pages/job/jobDetail?sn='+ this.sn + '&signcode=' + App.globalData.signcode,
+				desc: this.info.brief,
+			}
+		},
+		
+		// 小程序转发分享到朋友圈
+		onShareTimeline(){
+			
+		},
+		
+		onShow(){
+			this.initDetail(this.sn);
+		},
+		
+		onReady:function(){
+			
+		},
+		
 		methods: {
 			goBack() {
 				uni.navigateBack({
@@ -229,6 +289,7 @@
 						// 基础信息
 						this.info.job_type = res.data.info.job_type;
 						this.info.title = res.data.info.title;
+						this.info.brief = res.data.info.brief;
 						this.info.money = res.data.info.money;
 						this.info.earnest_money = res.data.info.earnest_money;
 						this.info.num = res.data.info.numbers;
@@ -286,11 +347,16 @@
 								};
 							}
 						}
-						
 						// #ifdef H5
-						// 订阅
 						if(this.isWeChat){
+							// 获取微信签名
+							App.subscribeShare();
+							
+							// 订阅
 							this.enrolled_subscribe_h5(this.can_sign,this.info.job_type);
+							
+							// 分享
+							this.share_h5();
 						}
 						// #endif
 					}else{
@@ -302,12 +368,10 @@
 				});
 			},
 			
-			// 订阅
+			// 订阅和分享
 			enrolled_subscribe_h5(can_sign,job_type){
 				if(can_sign == 1 && job_type != 2){
 					this.templateId = this.$globalUrl.template_id_enrolled;
-					App.subscribeShare();
-					
 					// wx-open-subscribe 原生绑定点击事件
 					this.$nextTick(() => {
 						var btn = this.$refs.subscribeBtn;
@@ -357,23 +421,67 @@
 			
 			// 分享
 			share(){
-				//分享到微信聊天，图文分享
-				uni.share({
-					provider: "weixin",
-					scene: "WXSceneSession",
-					type: 1,
-					miniProgram:{
-						
-					},
-					href: "http://uniapp.dcloud.io/", //这里写打开app的urlschemes
-					title: "uni-app分享",
-					summary: "我正在使用HBuilderX开发uni-app，赶紧跟我一起来体验！",
-					imageUrl: "https://img-cdn-qiniu.dcloud.net.cn/uniapp/images/uni@2x.png",
-					success: function (res) {
-							console.log("success:" + JSON.stringify(res));
-					},
-					fail: function (err) {
-							console.log("fail:" + JSON.stringify(err));
+				this.share_poster();
+			},
+			
+			// 分享
+			share_h5(){
+				var params = {
+					title:this.info.title,
+					desc: this.info.brief,
+					url:window.location.href
+				};
+				App.pageShare(params);
+			},
+			
+			// 生成海报
+			share_poster(){
+				uni.showLoading({
+					title: '合成中',
+				});
+				var plateform = 0;
+				// #ifdef H5
+				plateform = 1;
+				// #endif
+				
+				// #ifdef MP-WEIXIN
+				plateform = 2;
+				// #endif
+				
+				this.$api.posterShare({
+					token:uni.getStorageSync('user_token'),
+					sn:this.sn,
+					type:plateform,
+				}).then(res=>{
+					this.dialogCode = res.code;
+					if(res.code == 0){
+						this.posterImg = this.$globalUrl.baseUrl + res.data;
+						uni.hideLoading();
+						this.$refs.posterPopup.open();
+					}else if(res.code == 1){
+						uni.hideLoading();
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}else if(res.code == 2){ // 实名认证
+						uni.hideLoading();
+						this.$refs.alertDialog.open();
+						this.msgContent = res.msg;
+					}else if(res.code == 3){ // 手机号绑定
+						uni.hideLoading();
+						this.$refs.alertDialog.open();
+						this.msgContent = res.msg;
+					}else if(res.code == 4){ // 授权登录
+						uni.hideLoading();
+						this.$refs.alertDialog.open();
+						this.msgContent = res.msg;
+					}else{
+						uni.hideLoading();
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
 					}
 				});
 			},
@@ -395,6 +503,7 @@
 					token:uni.getStorageSync('user_token'),
 					exercise_sn:this.sn,
 				}).then(res=>{
+					this.dialogCode = res.code;
 					if(res.code == 0){
 						uni.showToast({
 							title: res.msg,
@@ -447,11 +556,17 @@
 			
 			// 点击操作按钮
 			buttonClick () {
+				var signcode = "";
 				// 立即报名
 				if(this.can_sign == 1){
 					var plateform = 0;
 					// #ifdef H5
 					plateform = 1;
+					var storage_signcode = uni.getStorageSync("job_signcode");
+					var JSON_signcode = storage_signcode?JSON.parse(storage_signcode):{}
+					if(Object.keys(JSON_signcode)[0] == this.sn){
+						signcode = JSON_signcode[this.sn]
+					}
 					// #endif
 					
 					// #ifdef MP-WEIXIN
@@ -470,6 +585,7 @@
 									token:uni.getStorageSync('user_token'),
 									sn:this.sn,
 									plateform:plateform,
+									signcode:signcode,
 								}).then(res=>{
 									this.dialogCode = res.code;
 									if(res.code == 0){

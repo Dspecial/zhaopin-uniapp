@@ -372,10 +372,34 @@
 			}
 		}
 	}
+	.uni-popup__wrapper{
+		.posterPopup{
+			background-color: #fff;
+			text-align: center;
+			border-radius: 20rpx;
+			box-sizing: border-box;
+			margin-top:40rpx;
+			.poster-image{
+				width:560rpx;
+				height: 1000rpx;
+				margin:0 auto;
+			}
+		}
+	}
 }
 .uni-dialog-content-text{
 	font-size: 32rpx!important;
 }
+.share_view{
+	button,.btn-share{
+		background-color: transparent!important;
+		padding: 0!important;
+	}
+	button::after,.btn-share::after{
+		border:none!important;
+	}
+}
+
 
 // my.vue
 .card-box{
@@ -855,7 +879,7 @@
 .backHome{
 	position: fixed;
 	right: 30rpx;
-	bottom: 80rpx;
+	bottom: 160rpx;
 	border-radius: 50%;
 }
 

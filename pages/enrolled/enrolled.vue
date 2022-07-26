@@ -14,11 +14,27 @@
 								<view @click="goDetail(cell)">
 									<view class="header d-flex justify-content-between align-items-center">
 										<text class="d-block fs_14 font-weight-semibold">{{ cell.title }}</text>
-										<text class="d-block fs_15 font-weight-semibold pay">
-											<text v-if="cell.status == 1 && (cell.is_check == 2 || cell.is_check == 3)">已报名</text>
-											<text v-else-if="cell.status == 2 && (cell.is_check == 2 || cell.is_check == 3)">进行中</text>
-											<text v-else-if="cell.status == 3">已完成</text>
+										<text class="d-block fs_15 font-weight-semibold">
+											<!-- 状态 -->
+											<!-- 如果status=1或2:is_check=2 报名审核中;is_check=3 审核通过;is_check=4 报名不通过;is_check=5自主取消
+											如果status=3 :is_check = 2 已结束;is_check=3的时候 如果is_end=1待结算;is_end=2已结算;is_check=4 报名不通过;is_check=5自主取消 -->
+											<template v-if="cell.status == 1 || cell.status == 2">
+												<text v-if="cell.is_check == 2" class="text-orange ml-1">报名审核中</text>
+												<text v-else-if="cell.is_check == 3" class="text-success ml-1">审核通过</text>
+												<text v-else-if="cell.is_check == 4" class="text-danger ml-1">报名不通过</text>
+												<text v-else-if="cell.is_check == 5" class="text-grey-150 ml-1">自主取消</text>
+											</template>
+											<template v-else-if="cell.status == 3">
+												<text v-if="cell.is_check == 2" class="text-grey-150 ml-1">已结束</text>
+												<template v-else-if="cell.is_check == 3">
+													<text v-if="cell.is_end == 1" class="text-orange ml-1">待结算</text>
+													<text v-else-if="cell.is_end == 2" class="text-success ml-1">已结算</text>
+												</template>
+												<text v-else-if="cell.is_check == 4" class="text-danger ml-1">报名不通过</text>
+												<text v-else-if="cell.is_check == 5" class="text-grey-150 ml-1">自主取消</text>
+											</template>
 										</text>
+										
 									</view>
 									<view class="content mt-2 mb-2">
 										{{ cell.brief }}
@@ -32,17 +48,12 @@
 											<view class="d-flex align-items-center">
 												<uni-icons type="location-filled" size="14"></uni-icons>
 												<text class="fs_11 ml-1">{{ cell.name }}</text>
-											</view>	
-											<view class="d-flex align-items-center">
-												<view class="d-flex align-items-center mr-3">
-													<image class="image" :src="personsIcon" mode="scaleToFill" style="width:24rpx;height:24rpx" />
-													<text class="fs_11 ml-1">{{ cell.numbers }}</text>
-												</view>
-												<view class="d-flex align-items-center">
-													<uni-icons type="eye-filled" size="14"></uni-icons>
-													<text class="fs_11 ml-1">{{ cell.all_views }}</text>
-												</view>
 											</view>
+											<!-- <view>
+												<text v-if="cell.status == 1 && (cell.is_check == 2 || cell.is_check == 3)">已报名</text>
+												<text v-else-if="cell.status == 2 && (cell.is_check == 2 || cell.is_check == 3)">进行中</text>
+												<text v-else-if="cell.status == 3">已完成</text>
+											</view> -->
 										</view>
 									</view>
 								</view>
@@ -154,10 +165,18 @@
 			// 查看详情
 			goDetail(item){
 				// console.log(item,'item');
-				uni.navigateTo({
-					// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
-					url: "/pages/enrolled/enrolledDetail?id=" + item.id,
-				})
+				if(item.is_end == 4 || item.is_end == 5){
+					uni.navigateTo({
+						// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+						url: "/pages/job/jobDetail?sn=" + item.sn,
+					})
+				}else{
+					uni.navigateTo({
+						// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+						url: "/pages/enrolled/enrolledDetail?id=" + item.id,
+					})
+				}
+				
 			},
 			
 			// 取消报名

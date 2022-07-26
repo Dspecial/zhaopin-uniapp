@@ -5,7 +5,7 @@
 			<image class="image profile-bg" :src="profileBg" mode="aspectFill" />
 			<view class="pl-3 pr-3 profile-content pt-2">
 				<view class="d-flex align-items-center">
-					<image class="image avatar" :src="profile.avatar" mode="aspectFit" />
+					<image class="image avatar" :src="profile.avatar" mode="aspectFill" />
 					<view class="text-white ml-3">
 						<template v-if="!user_token">
 							<span class="getUserInfo" @click="goAuth">请点击登录</span>
@@ -112,7 +112,7 @@
 					</view>
 				</view>
 				<!-- 联系客服 -->
-				<view class="d-flex justify-content-between align-items-center my-function-cell pt-3">
+				<view class="d-flex justify-content-between align-items-center my-function-cell pt-3" @click="goMobile()">
 					<view class="d-flex align-items-center">
 						<image class="image" :src="functions.img6" mode="aspectFit" />
 						<text class="ml-2">联系客服</text>
@@ -178,16 +178,18 @@
 					img6: require("@/packageMy/static/my/fun_icon6.png"),
 				},
 				isWeChat:App.globalData.isWeChat,
+				service_mobile:"",
 			}
 		},
 		onLoad(options){
 			this.user_token = uni.getStorageSync('user_token');
-			if(this.user_token){
-				this.getProfileInfo(this.user_token);
-			}
+			this.initMobile();
 		},
 		onShow(){
 			this.user_token = uni.getStorageSync('user_token');
+			if(this.user_token){
+				this.getProfileInfo(this.user_token);
+			}
 		},
 		methods: {
 			// 跳转授权页面
@@ -215,6 +217,22 @@
 						}else{
 							this.profile.avatar = this.$globalUrl.baseUrl + res.data.avatar;
 						}
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// 获取联系客服
+			initMobile(){
+				this.$api.aboutUs({
+					name: 'service_mobile',
+				}).then(res=>{
+					if(res.code == 0){
+						this.service_mobile = res.data.value
 					}else{
 						uni.showToast({
 							title: res.msg,
@@ -289,10 +307,17 @@
 			// 跳转实名认证
 			goAuthentication(){
 				if(this.user_token){
-					uni.navigateTo({
-						// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
-						url: "/packageMy/pages/my/authentication/authentication",
-					})
+					if(this.profile.is_auth == 2){ // 已认证
+						uni.showToast({
+							title: '您已进行过认证！',
+							icon: 'none'
+						});
+					}else{
+						uni.navigateTo({
+							// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+							url: "/packageMy/pages/my/authentication/authentication",
+						})
+					}
 				}else{
 					uni.showModal({
 						title: '温馨提示',
@@ -426,6 +451,22 @@
 					// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
 					url: "/packageMy/pages/my/about/about",
 				})
+			},
+			
+			// 联系客服
+			goMobile(){
+				uni.makePhoneCall({
+					// 手机号
+					phoneNumber: this.service_mobile, 
+					// 成功回调
+					success: (res) => {
+						console.log('调用成功!')	
+					},
+					// 失败回调
+					fail: (res) => {
+						console.log('调用失败!')
+					}
+				});
 			},
 			
 			// 退出登录

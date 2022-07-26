@@ -5,6 +5,8 @@
 	export default {
 		globalData:{
 			isWeChat:false,
+			logo:"",
+			signcode:"",
 		},
 		onLaunch: function() {
 			// console.warn('当前组件仅支持 uni_modules 目录结构 ，请升级 HBuilderX 到 3.1.0 版本以上！')
@@ -23,6 +25,10 @@
 			console.log('App Show')
 			// #ifdef H5
 			this.hideNavBar();
+			this.initLogo();
+			if(uni.getStorageSync('user_token')){
+				this.getProfileInfo(uni.getStorageSync('user_token'));
+			}
 			// #endif
 		},
 		onHide: function() {
@@ -46,21 +52,13 @@
 				}
 			},
 			
-			// 订阅消息
-			subscribeShare(){
-				this.$api.share({
-					url: "http://h5.yuezhongkeji.com/web/",
+			// 获取logo
+			initLogo(){
+				this.$api.aboutUs({
+					name: 'logo',
 				}).then(res=>{
 					if(res.code == 0){
-						jweixin.config({
-							debug: true,
-							appId: res.data.appId,
-							timestamp: res.data.timestamp,
-							nonceStr: res.data.nonceStr,
-							signature: res.data.signature,
-							jsApiList: ['wx-open-launch-weapp', 'wx-open-subscribe'], // 必填，需要使用的JS接口列表,
-							openTagList: ['wx-open-launch-weapp', 'wx-open-subscribe'],
-						});
+						this.$options.globalData.logo = this.$globalUrl.baseUrl + res.data.value;
 					}else{
 						uni.showToast({
 							title: res.msg,
@@ -69,6 +67,99 @@
 					}
 				});
 			},
+			
+			// 获取用户信息
+			getProfileInfo(token){
+				this.$api.profileInfo({
+					token:token
+				}).then(res=>{
+					if(res.code == 0){
+						this.$options.globalData.signcode = res.data.signcode;
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			
+			// 订阅消息
+			subscribeShare(){
+				this.$api.share({
+					url: "http://h5.yuezhongkeji.com/web/",
+				}).then(res=>{
+					if(res.code == 0){
+						jweixin.config({
+							debug: false,
+							appId: res.data.appId,
+							timestamp: res.data.timestamp,
+							nonceStr: res.data.nonceStr,
+							signature: res.data.signature,
+							jsApiList: [
+								'wx-open-launch-weapp',
+								'wx-open-subscribe',
+								'onMenuShareTimeline',
+								'onMenuShareAppMessage',
+								'updateAppMessageShareData',
+								'updateTimelineShareData'
+							], // 必填，需要使用的JS接口列表,
+							openTagList: ['wx-open-launch-weapp', 'wx-open-subscribe'],
+						});
+						// 完成签名后，进行分享
+						
+						
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// 分享页面
+			pageShare(params){
+				var sTitle = params.title;
+				var sDesc = params.desc;
+				var sLink;
+				if(params.url.indexOf('&signcode=') != -1){ // 存在
+					sLink = params.url.split('&signcode=')[0];
+				}else{
+					sLink = params.url;
+				}
+				if(this.$options.globalData.signcode){
+					sLink = sLink + "&signcode=" + this.$options.globalData.signcode;
+				}
+				var sImgUrl = this.$options.globalData.logo;
+				jweixin.ready((jweixin_res)=> {
+					// 分享给朋友
+					jweixin.updateAppMessageShareData({
+						title: sTitle, // 分享标题
+						desc: sDesc, // 分享描述
+						link: sLink, // 分享链接，该链接域名或路径必须与当前页面对应的公众号 JS 安全域名一致
+						imgUrl: sImgUrl, // 分享的logo
+						success: (success_res) => {
+							// alert('已分享给好友');
+						},
+						cancel: (cancel_res) => {
+							// alert('已取消');
+						},
+					});
+					
+					// 分享到朋友圈
+					jweixin.updateTimelineShareData({ 
+						title: sTitle,
+						link: sLink,
+						imgUrl: sImgUrl,
+						success: () => {
+							// alert('已分享到朋友圈');
+						}
+					});
+				})
+			},
+			
 		},
 	}
 </script>

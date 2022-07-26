@@ -86,9 +86,6 @@
 			}
 		},
 		onLoad(){
-			
-		},
-		onshow(){
 			this.user_token = uni.getStorageSync('user_token');
 			var eObj = {
 				currentIndex:0
@@ -96,6 +93,9 @@
 			if(this.user_token){
 				this.onClickItem(eObj);
 			}
+		},
+		onshow(){
+			this.user_token = uni.getStorageSync('user_token');
 		},
 		methods: {
 			goBack() {

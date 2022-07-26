@@ -185,12 +185,19 @@
 			</view>
 			
 		</view>
+		
+		<!-- 返回首页 -->
+		<back-home></back-home>
 	</view>
 </template>
 
 <script>
 	let App = getApp();
+	import backHome from "@/components/back-home/back-home.vue"
 	export default {
+		components:{
+			backHome
+		},
 		data() {
 			return {
 				sn:"",
@@ -231,7 +238,27 @@
 		onLoad:function(option){
 			// option 接受url的传参 
 			this.id = option.id;
-			this.initDetail(option.id);
+		},
+		
+		onShow:function(){
+			this.initDetail(this.id);
+		},
+	
+		// 小程序转发分享给朋友
+		onShareAppMessage(option){
+			if (option.from === 'button') { // 来自页面内分享按钮
+				console.log(option.target)
+			}
+			return {
+				title: this.info.title,
+				path: '/pages/job/jobDetail?sn='+ this.info.sn + '&signcode=' + App.globalData.signcode,
+				desc: this.info.brief,
+			}
+		},
+		
+		// 小程序转发分享到朋友圈
+		onShareTimeline(){
+			
 		},
 	
 		methods: {
@@ -249,7 +276,9 @@
 				}).then(res=>{
 					if(res.code == 0){
 						// 基础信息
+						this.info.sn = res.data.info.sn;
 						this.info.title = res.data.info.title;
+						this.info.brief = res.data.info.brief;
 						this.info.status = res.data.info.status;
 						this.info.money = res.data.info.money;
 						this.info.earnest_money = res.data.info.earnest_money;
@@ -277,9 +306,15 @@
 						this.info.is_check = res.data.info.is_check;
 						
 						// #ifdef H5
-						// 订阅
 						if(this.isWeChat){
+							// 获取微信签名
+							App.subscribeShare();
+							
+							// 订阅
 							this.sign_subscribe_h5(this.info.is_check);
+							
+							// 分享
+							this.share_h5();
 						}
 						// #endif
 						
@@ -296,7 +331,6 @@
 			sign_subscribe_h5(is_check){
 				if(is_check == 3){
 					this.templateId = this.$globalUrl.template_id_sign;
-					App.subscribeShare();
 					
 					// wx-open-subscribe 原生绑定点击事件
 					this.$nextTick(() => {
@@ -333,6 +367,20 @@
 						console.log('success');
 					}
 				});
+			},
+			
+			// 分享
+			share_h5(){
+				var _hrefArry = window.location.href.split("#");
+				var _href1 = _hrefArry[0];
+				var _href2 = "#/pages/job/jobDetail";
+				var _href3 = "?sn="+ this.info.sn;
+				var params = {
+					title:this.info.title,
+					desc: this.info.brief,
+					url:_href1+_href2+_href3,
+				};
+				App.pageShare(params);
 			},
 			
 			// 签到、签退

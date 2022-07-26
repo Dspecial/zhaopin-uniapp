@@ -199,43 +199,57 @@
 				// #ifdef MP-WEIXIN
 				plateform = 2;
 				// #endif
-				this.$api.withdrawalApply({
-					token:uni.getStorageSync('user_token'),
-					deposit_money:this.withdrawalForm.amount,
-					account_id:this.withdrawalForm.account,
-					type:this.withdrawalForm.type,
-					plateform:plateform,
-				}).then(res=>{
-					if(res.code == 0){
-						uni.showToast({
-							title: '提现成功',
-							icon: 'success'
-						});
-						this.withdrawalForm = {
-							type:"",
-							account:"",
-							amount:"",
-						};
-						this.getBalance();
-						setTimeout(()=>{
-							uni.navigateBack({
-								success: () => {
-									let page = getCurrentPages().pop();  //跳转页面成功之后
-									if (!page) {
-										return;
-									} else {
-										page.onLoad(page.options);// page自带options对象.
-									}
+				
+				uni.showModal({
+					title: '温馨提示',
+					content: '请确认是否提现',
+					confirmText: '确定',
+					cancelText: '取消',
+					success: (modal_res) => {
+						if (modal_res.confirm) {
+							this.$api.withdrawalApply({
+								token:uni.getStorageSync('user_token'),
+								deposit_money:this.withdrawalForm.amount,
+								account_id:this.withdrawalForm.account,
+								type:this.withdrawalForm.type,
+								plateform:plateform,
+							}).then(res=>{
+								if(res.code == 0){
+									uni.showToast({
+										title: res.msg,
+										icon: 'success'
+									});
+									setTimeout(()=>{
+										this.withdrawalForm = {
+											type:"",
+											account:"",
+											amount:"",
+										};
+										this.getBalance();
+										uni.navigateBack({
+											success: () => {
+												let page = getCurrentPages().pop();  //跳转页面成功之后
+												if (!page) {
+													return;
+												} else {
+													page.onLoad(page.options);// page自带options对象.
+												}
+											}
+										})
+									},2000)
+								}else{
+									uni.showToast({
+										title: res.msg,
+										icon: 'none'
+									});
 								}
-							})
-						})
-					}else{
-						uni.showToast({
-							title: res.msg,
-							icon: 'none'
-						});
+							});
+						} else if (modal_res.cancel) {
+							console.log('关闭');
+						}
 					}
 				});
+				
 			},
 		}
 	}

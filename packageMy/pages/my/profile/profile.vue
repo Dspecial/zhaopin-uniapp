@@ -7,7 +7,7 @@
 				<view class="profile-cell d-flex align-items-center pl-3 pr-3">
 					<uni-forms-item label="头像" name="avatarImg">
 						<text class="text-grey-700 fs_15" slot="label">头像</text>
-						<image class="image avatar ml-auto" :src="baseFormData.avatarImg" mode="widthFix" @click="changeAvatar"></image>
+						<image class="image avatar ml-auto" :src="baseFormData.avatarImg" mode="aspectFill" @click="changeAvatar"></image>
 					</uni-forms-item>
 				</view>
 				
@@ -129,8 +129,10 @@
 						}
 						if(res.data.avatar.indexOf("http") >= 0){
 							this.baseFormData.avatarImg = res.data.avatar;
+							this.avatarImg = res.data.avatar;
 						}else{
 							this.baseFormData.avatarImg = this.$globalUrl.baseUrl + res.data.avatar;
+							this.avatarImg = res.data.avatar;
 						}
 						this.baseFormData.name = res.data.truename;
 						this.baseFormData.sex = res.data.sex;

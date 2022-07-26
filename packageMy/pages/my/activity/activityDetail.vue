@@ -137,7 +137,7 @@
 									<text class="my-btn" @click="evaluate(list)">评价</text>
 								</view>
 							</view>
-							<view v-if="list.is_check == 2">
+							<view v-else-if="list.is_check == 2">
 								<view class="action d-flex justify-content-end">
 									<text class="my-btn" @click="check(3,list)">审核通过</text>
 									<text class="my-btn ml-2" @click="check(4,list)">审核不通过</text>
@@ -150,7 +150,7 @@
 						<uni-section title="评价" type="line" v-if="list.content">
 							<view>{{ list.content }}</view>
 						</uni-section>
-						<uni-section title="签到记录" type="line" class="sign-records">
+						<uni-section title="签到记录" type="line" class="sign-records"  v-if="list.is_check == 3">
 							<view class="mt-2 uni-table fs_13">
 								<!-- 表头 -->
 								<view class="table-header">
@@ -267,7 +267,7 @@
 								</view>
 							</uni-forms>
 							<view class="text-center pt-5 pb-5">
-								<text class="my-btn bg-primary-600 p-2 fs_14" @click="signInOut_replace()">签到</text>
+								<text class="my-btn bg-primary-600 fs_13" @click="signInOut_replace()">签到</text>
 							</view>
 						</uni-section>
 					</view>
@@ -399,9 +399,13 @@
 		onLoad:function(option){
 			// option 接受url的传参
 			this.sn = option.sn;
-			this.initDetail(option.sn);
-			this.initSign(option.sn);
 		},
+		
+		onShow:function(){
+			this.initDetail(this.sn);
+			this.initSign(this.sn);
+		},
+		
 		methods: {
 			goBack() {
 				uni.navigateBack({
@@ -562,6 +566,7 @@
 					}
 				});
 			},
+			
 			// 日期改变
 			dateChange(e){
 				this.searchDate = e;
@@ -716,8 +721,8 @@
 				uni.showModal({
 					title: '温馨提示',
 					content: '请确认审核操作!',
-					success: function (res) {
-						if (res.confirm) {
+					success: (modal_res)=>{
+						if (modal_res.confirm) {
 							_this.$api.activityCheck({
 								token:uni.getStorageSync('user_token'),
 								sn:_this.sn,
@@ -738,7 +743,7 @@
 									});
 								}
 							});
-						} else if (res.cancel) {
+						} else if (modal_res.cancel) {
 							console.log('用户点击取消');
 						}
 					}
@@ -757,8 +762,8 @@
 					function_type:1,
 				}).then(res=>{
 					if(res.code == 0){
-						this.evaluateForm.score = res.data.score;
-						this.evaluateForm.content = res.data.content;
+						this.evaluateForm.score = res.data?res.data.score:'';
+						this.evaluateForm.content = res.data?res.data.content:'';
 					}else{
 						uni.showToast({
 							title: res.msg,
