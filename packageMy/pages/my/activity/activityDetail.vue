@@ -1,6 +1,6 @@
 <template>
 	<view class="page-container detail-container">
-		<uni-nav-bar dark :fixed="true" status-bar left-icon="left" :border="false" title="职位详情" @clickLeft="goBack" />
+		<uni-nav-bar dark :fixed="true" status-bar left-icon="left" :border="false" title="活动详情" @clickLeft="goBack" />
 		<view class="bg_arc_detail"></view>
 		<view class="p-3 detail-content">
 			<view class="info-box p-3">
@@ -98,23 +98,22 @@
 					</view>
 					<text @click="search()" class="ml-2 my-btn w-10">搜索</text>
 				</view>
-				<view class="d-flex justify-content-between mt-2">
-					<view class="fs_14">
-						<view>
-							<text>已报名<text class="mx-2 font-weight-black">{{ sign_count }}</text>人</text>
-							<text class="ml-2">待审核<text class="mx-2 font-weight-black">{{ sign_load_check_count }}</text>人</text>
+				<!-- 日期搜索 -->
+				<view class="d-flex justify-content-end align-items-center mt-2">
+					<text>{{ searchDate }}</text>
+					<uni-datetime-picker type="date" v-model="searchDate" :start="can_startDate" :end="can_endDate" @change="dateChange">
+						<image class="image ml-2" :src="dateImg" mode="aspectFit" style="width: 30rpx;height:30rpx" />
+					</uni-datetime-picker>
+				</view>
+				
+				<!-- tab选项卡 -->
+				<view class="mt-2 d-flex flex-wrap sign-tab">
+					<template v-for="(tabItem,index) in signTab">
+						<view :class="['fs_12 sign-tab-item px-2 py-1 m-1',activeTab == (index+1)?'active':'']" @click="changeTab(index)">
+							<text>{{ tabItem.title }}</text>
+							<text class="num">{{ tabItem.value }}</text><text v-if="tabItem.value !== ''">人</text>
 						</view>
-						<view class="mt-2">
-							<text>已通过<text class="mx-2 font-weight-black">{{ sign_check_count }}</text>人</text>
-							<text class="ml-2">不通过<text class="mx-2 font-weight-black">{{ sign_no_pass_count }}</text>人</text>
-						</view>
-					</view>
-					<view class="d-flex align-items-center">
-						<text>{{ searchDate }}</text>
-						<uni-datetime-picker type="date" v-model="searchDate" :start="can_startDate" :end="can_endDate" @change="dateChange">
-							<image class="image ml-2" :src="dateImg" mode="aspectFit" style="width: 30rpx;height:30rpx" />
-						</uni-datetime-picker>
-					</view>
+					</template>
 				</view>
 				
 				<!-- 已报名人员 -->
@@ -122,10 +121,20 @@
 					<view v-for="(list,index) in registerList" :key="index" class="register-item mt-3 pb-3">
 						<view class="d-flex align-items-center justify-content-between">
 							<view class="d-flex align-items-center">
-								<image class="image avatar" :src="list.avatar" mode="scaleToFill"/>
+								<view class="d-flex align-items-center">
+									<text class="mr-1 bg-warning sort d-flex justify-content-center align-items-center">
+										<text class="fs_18 font-weight-black">{{ index+1 }}</text>
+									</text>
+									<!-- <image class="image avatar" :src="list.avatar" mode="scaleToFill"/> -->
+								</view>
 								<view class="ml-2">
 									<text class="d-block">{{ list.truename }}</text>
-									<text class="d-block">{{ list.mobile }}</text>
+									<text class="d-block">
+										<text v-if="list.sex == 1">性别：未知</text>
+										<text v-else-if="list.sex == 2">性别：男</text>
+										<text v-else-if="list.sex == 3">性别：女</text>
+									</text>
+									<text class="d-block" @click="callPhone(list.mobile)">{{ list.mobile }}</text>
 								</view>
 							</view>
 							<view v-if="list.is_check == 3">
@@ -156,16 +165,16 @@
 								<view class="table-header">
 									<uni-row class="text-grey-150 font-weight-black">
 										<view class="d-flex">
-											<uni-col :span="12">
+											<uni-col :span="11">
 												<view class="text-center p-2 uni-table-tr">日期</view>
 											</uni-col>
-											<uni-col :span="6">
+											<uni-col :span="7">
 												<view class="text-center p-2 uni-table-tr">签到</view>
 											</uni-col>
-											<uni-col :span="6">
+											<uni-col :span="7">
 												<view class="text-center p-2 uni-table-tr">签退</view>
 											</uni-col>
-											<uni-col :span="8" v-if="list.is_check == 3">
+											<uni-col :span="7" v-if="list.is_check == 3">
 												<view class="text-center p-2 uni-table-tr">工资</view>
 											</uni-col>
 										</view>
@@ -180,16 +189,28 @@
 										<view v-for="(record, re_index) in list.record_list" :key="re_index" @click="showMore(re_index)">
 											<uni-row>
 												<view class="d-flex">
-													<uni-col :span="12">
+													<uni-col :span="11">
 														<view class="text-center p-2 uni-table-tr">{{ record.date }}</view>
 													</uni-col>
-													<uni-col :span="6">
-														<view class="text-center p-2 uni-table-tr">{{ record.signtime?"是":"否" }}</view>
+													<uni-col :span="7">
+														<view class="text-center p-2 uni-table-tr">
+															<text v-if="record.signtime">
+																是
+																<text v-if="record.signstatus == 3" class="text-danger fs_10">(迟到)</text>
+															</text>
+															<text v-else>否</text>
+														</view>
 													</uni-col>
-													<uni-col :span="6">
-														<view class="text-center p-2 uni-table-tr">{{ record.signbacktime?"是":"否" }}</view>
+													<uni-col :span="7">
+														<view class="text-center p-2 uni-table-tr">
+															<text v-if="record.signbacktime">
+																是
+																<text v-if="record.signbackstatus == 3" class="text-danger fs_10">(迟到)</text>
+															</text>
+															<text v-else>否</text>
+														</view>
 													</uni-col>
-													<uni-col :span="8" v-if="list.is_check == 3">
+													<uni-col :span="7" v-if="list.is_check == 3">
 														<view class="text-center p-2 uni-table-tr">
 															<text class="fs_12 text-primary-600" @click="setPay(list,record)">设置工资</text>
 														</view>
@@ -317,6 +338,20 @@
 			</view>
 			
 		</view>
+		
+		<!-- 查看签到码 -->
+		<view class="backHome bg-primary-600 d-flex align-items-center justify-content-center p-2" @click="showSignCode">
+			<image class="image signCodeImg" :src="signCodeImg" mode="aspectFit"/>
+		</view>
+		
+		<!-- 签到码窗口 -->
+		<uni-popup ref="signCodePopup">
+			<view class="signCodePopup p-3">
+				<text class="d-block fs_18">扫码签到</text>
+				<image class="image signcode-image" :src="posterImg" mode="aspectFit" />
+				<text class="mt-3 d-block fs_14">长按图片保存到相册</text>
+			</view>
+		</uni-popup>
 	</view>
 </template>
 
@@ -352,10 +387,33 @@
 					width: 70,
 					height: 70,
 				},
-				sign_count:"8", // 已报名
-				sign_check_count:"6", // 已通过
-				sign_load_check_count:"8", // 待审核
-				sign_no_pass_count:"6", // 不通过
+				signTab:[
+					{
+						title:"已报名",
+						value:""
+					},
+					{
+						title:"待审核",
+						value:""
+					},
+					{
+						title:"已通过",
+						value:""
+					},
+					{
+						title:"不通过",
+						value:""
+					},
+					{
+						title:"已签到",
+						value:""
+					},
+					{
+						title:"未签到",
+						value:""
+					},
+				],
+				activeTab:-1,
 				registerList:[],
 				currentPage:1,
 				pageSize:5,
@@ -394,6 +452,9 @@
 					money:"",
 					is_send:"", // is_send为2 就没确定按钮
 				},
+				// 签到码
+				signCodeImg:require("@/static/ewm_icon.png"),
+				posterImg:"",
 			}
 		},
 		onLoad:function(option){
@@ -403,7 +464,8 @@
 		
 		onShow:function(){
 			this.initDetail(this.sn);
-			this.initSign(this.sn);
+			this.initPersonNum(this.sn);
+			this.initSign(this.sn,'');
 		},
 		
 		methods: {
@@ -440,31 +502,8 @@
 						this.info.contact = res.data.info.truename;
 						this.info.tel = res.data.info.mobile;
 						this.info.ewmImg = this.$globalUrl.baseUrl + res.data.info.codeimage;
-					}else{
-						uni.showToast({
-							title: res.msg,
-							icon: 'none'
-						});
-					}
-				});
-			},
-			
-			// 获取签到+报名
-			initSign(sn){
-				this.$api.activitySignList({
-					sn:sn,
-					token:uni.getStorageSync('user_token'),
-					page:this.currentPage,
-					limit:this.pageSize,
-					keywords:this.searchValue,
-					date:this.searchDate,
-				}).then(res=>{
-					if(res.code == 0){
-						this.sign_count = res.data.sign_count; // 已报名人数
-						this.sign_check_count = res.data.sign_check_count; // 已通过人数
-						this.sign_load_check_count = res.data.sign_load_check_count; // 待审核人数
-						this.sign_no_pass_count = res.data.sign_no_pass_count; // 不通过人数
 						
+						// 可筛选日期
 						this.can_startDate = res.data.range_date[0];
 						this.can_endDate = res.data.range_date[res.data.range_date.length - 1];
 						
@@ -475,6 +514,61 @@
 							}
 						});
 						
+						// 签到码
+						this.posterImg = this.$globalUrl.baseUrl + res.data.info.wx_signimage;
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// 获取各类型的人数
+			initPersonNum(sn){
+				this.$api.personCount({
+					sn:sn,
+					token:uni.getStorageSync('user_token'),
+					keywords:this.searchValue,
+					date:this.searchDate,
+				}).then(res=>{
+					if(res.code == 0){
+						// 审核列表里的数据
+						this.signTab[0].value = res.data.sign_count; // 已报名人数
+						this.signTab[1].value = res.data.sign_load_check_count; // 待审核人数
+						this.signTab[2].value = res.data.sign_check_count; // 已通过人数
+						this.signTab[3].value = res.data.sign_no_pass_count; // 不通过人数
+						// this.signTab[4].value = res.data.sign_count; // 已签到人数
+						// this.signTab[5].value = res.data.sign_count; // 未签到人数
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// tab切换
+			changeTab(index){
+				this.activeTab = index+1;
+				this.currentPage = 1;
+				this.initSign(this.sn,this.activeTab);
+			},
+			
+			// 获取签到+报名
+			initSign(sn,type){
+				this.$api.activitySignList({
+					sn:sn,
+					token:uni.getStorageSync('user_token'),
+					page:this.currentPage,
+					limit:this.pageSize,
+					keywords:this.searchValue,
+					date:this.searchDate,
+					type:type,
+				}).then(res=>{
+					if(res.code == 0){
 						this.total = res.data.sign_list.total;
 						if (this.currentPage == 1) {
 							this.registerList = res.data.sign_list.data.map((item)=>{
@@ -579,12 +673,32 @@
 				this.currentPage = 1;
 				this.pageSize = 5;
 				this.total = 0;
-				this.initSign(this.sn);
+				this.initSign(this.sn,this.activeTab);
+			},
+			
+			// 拨打电话
+			callPhone(tel){
+				uni.makePhoneCall({
+					// 手机号
+					phoneNumber: tel, 
+					// 成功回调
+					success: (res) => {
+						console.log('调用成功!')	
+					},
+					// 失败回调
+					fail: (res) => {
+						console.log('调用失败!')
+					}
+				});
 			},
 			
 			// 展示签到签退图片
 			showMore(index){
-				this.showImagesIndex = index;
+				if(this.showImagesIndex === index){
+					this.showImagesIndex = -1
+				}else{
+					this.showImagesIndex = index;
+				};
 			},
 			
 			// 签到的弹窗打开
@@ -865,7 +979,6 @@
 							icon: 'success'
 						});
 						this.$refs.payPopup.close();
-						// location.reload();
 						this.search();
 					}else{
 						uni.showToast({
@@ -876,29 +989,34 @@
 				});
 			},
 			
-			// 上拉加载
-			onReachBottom() {
-				this.currentPage++;
-				if (this.registerList.length < this.total) {
-					this.initSign(this.sn);
-				} else {
-					uni.hideNavigationBarLoading();
-					this.loadStatus = "no-more";
-				}
+			// 查看签到码
+			showSignCode(){
+				this.$refs.signCodePopup.open();
 			},
-			
-			// 下拉刷新
-			onPullDownRefresh(){
-				this.loadStatus = "more";
-				this.currentPage = 1;
-				this.pageSize = 5;
-				this.total = 0;
-				this.initSign(this.sn);
-				setTimeout(function () {
-					uni.stopPullDownRefresh();  //停止下拉刷新动画
-				}, 1000);
-			},
-		}
+		},
+		
+		// 上拉加载
+		onReachBottom() {
+			this.currentPage++;
+			if (this.registerList.length < this.total) {
+				this.initSign(this.sn,this.activeTab);
+			} else {
+				uni.hideNavigationBarLoading();
+				this.loadStatus = "no-more";
+			}
+		},
+		
+		// 下拉刷新
+		onPullDownRefresh(){
+			this.loadStatus = "more";
+			this.currentPage = 1;
+			this.pageSize = 5;
+			this.total = 0;
+			this.initSign(this.sn);
+			setTimeout(function () {
+				uni.stopPullDownRefresh();  //停止下拉刷新动画
+			}, 1000);
+		},
 	}
 </script>
 

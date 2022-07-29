@@ -96,7 +96,7 @@
 							<!-- #ifdef H5 -->
 							<!-- 微信环境 -->
 							<template v-if="isWeChat">
-								<wx-open-subscribe :template="templateId" ref="subscribeBtnSignIn">
+								<!-- <wx-open-subscribe :template="templateId" ref="subscribeBtnSignIn">
 									<script type="text/wxtag-template" slot="style">
 											<style>
 													.text {
@@ -108,7 +108,8 @@
 									<script type="text/wxtag-template">
 										<div class="text">上班签到</div>
 									</script>
-								</wx-open-subscribe>
+								</wx-open-subscribe> -->
+								<text @click="signInOut(1)">上班签到</text>
 							</template>
 							<template v-else>
 								<text @click="signInOut(1)">上班签到</text>
@@ -125,7 +126,7 @@
 							<!-- #ifdef H5 -->
 							<!-- 微信环境 -->
 							<template v-if="isWeChat">
-								<wx-open-subscribe :template="templateId" ref="subscribeBtnSignOut">
+								<!-- <wx-open-subscribe :template="templateId" ref="subscribeBtnSignOut">
 									<script type="text/wxtag-template" slot="style">
 											<style>
 													.text {
@@ -137,7 +138,8 @@
 									<script type="text/wxtag-template">
 										<div class="text">下班签退</div>
 									</script>
-								</wx-open-subscribe>
+								</wx-open-subscribe> -->
+								<text @click="signInOut(2)">下班签退</text>
 							</template>
 							<template v-else>
 								<text @click="signInOut(2)">下班签退</text>

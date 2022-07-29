@@ -47,6 +47,13 @@
 			}	
 		},
 		{
+			"path" : "pages/job/signDetail",
+			"style" : {
+					"navigationBarTitleText": "扫码签到",
+					"enablePullDownRefresh": false
+			}
+		},
+		{
 			"path" : "pages/enrolled/enrolled",
 			"style" : {
 				"navigationBarTitleText": "我的报名",
@@ -67,6 +74,27 @@
 				"navigationBarTitleText": "个人中心",
 				"enablePullDownRefresh": false
 			}		
+		},
+		{
+			"path" : "pages/register/register",
+			"style" : {
+				"navigationBarTitleText": "注册",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path" : "pages/register/guidance/guidance",
+			"style" : {
+				"navigationBarTitleText": "注册协议",
+				"enablePullDownRefresh": false
+			}	
+		},
+		{
+			"path" : "pages/webview/webview",
+			"style" : {
+				"navigationBarTitleText": "查看岗位",
+				"enablePullDownRefresh": false
+			}
 		}
   ],
 	// 分包
@@ -204,7 +232,7 @@
 				"pagePath": "pages/enrolled/enrolled",
 				"iconPath": "static/tabbar/enrolled1.png",
 				"selectedIconPath": "static/tabbar/enrolled2.png",
-				"text": "已报名"
+				"text": "报名"
 			},
 			{
 				"pagePath": "pages/my/my",

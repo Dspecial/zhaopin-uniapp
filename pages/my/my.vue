@@ -479,6 +479,7 @@
 					success: (res) => {
 						if (res.confirm) {
 							uni.removeStorageSync('user_token');
+							uni.removeStorageSync('user_info');
 							uni.removeStorageSync('beforePageFullPath');
 							uni.removeStorageSync('enrolled_activeTab');
 							uni.removeStorageSync('job_activeTab');

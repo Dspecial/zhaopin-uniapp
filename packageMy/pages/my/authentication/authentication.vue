@@ -1,24 +1,28 @@
 <template>
 	<view class="page-container auth-container">
 		<uni-nav-bar dark :fixed="true" status-bar left-icon="left" :border="false" title="实名认证" @clickLeft="goBack" />
+		
 		<view class="p-3">
-			<!-- 拍摄 -->
-			<view class="mb-3">
-				<text class="text-grey-150 fs_15">请拍摄并上传你的有效身份证</text>
-				<view class="mt-3 d-inline-block auth-card">
-					<view class="p-3">
-						<image class="image auth-image" :src="authCard" mode="aspectFit" />
-					</view>
-					<view class="bg-primary-600 d-block text-center my-btn fs_14" @click="unloadIDImage">上传身份证正面</view>
-				</view>
-			</view>
 			<!-- 表单 -->
 			<uni-forms ref="authForm" :modelValue="authForm" label-position="top" label-width="200" class="authForm">
+				<uni-forms-item label="认证类型" name="type">
+					<uni-data-checkbox v-model="authForm.type" :localdata="typeOptions" @change="typeChange"></uni-data-checkbox>
+				</uni-forms-item>
+				<!-- 拍摄 -->
+				<view class="mb-3" v-if="authForm.type == 1">
+					<text class="text-grey-150 fs_15">请拍摄并上传你的有效身份证</text>
+					<view class="mt-3 d-inline-block auth-card">
+						<view class="p-3">
+							<image class="image auth-image" :src="authCard" mode="aspectFit" />
+						</view>
+						<view class="bg-primary-600 d-block text-center my-btn fs_14" @click="unloadIDImage">上传身份证正面</view>
+					</view>
+				</view>
 				<uni-forms-item label="姓名">
 					<uni-easyinput v-model="authForm.name" placeholder="请输入姓名" />
 				</uni-forms-item>
 				<uni-forms-item label="身份证号码">
-					<uni-easyinput v-model="authForm.idcode" placeholder="请输入身份证号码" />
+					<uni-easyinput type="idcard" v-model="authForm.idcode" placeholder="请输入身份证号码" />
 				</uni-forms-item>
 			</uni-forms>
 			<view class="p-btn">
@@ -34,9 +38,15 @@
 			return {
 				authCard: require("@/packageMy/static/my/auth_card.png"),
 				authForm:{
+					type:1,
+					idcodeimage:"",
 					name:"",
 					idcode:"",
 				},
+				typeOptions:[
+					{"value": 1,"text": "自动识别"	},
+					{"value": 2,"text": "手动输入"	},
+				]
 			}
 		},
 		methods: {
@@ -44,6 +54,12 @@
 				uni.navigateBack({
 					delta: 1
 				})
+			},
+			
+			typeChange(){
+				this.authForm.idcodeimage = "";
+				this.authForm.name = "";
+				this.authForm.idcode = "";
 			},
 			
 			// 上传身份证
@@ -102,22 +118,23 @@
 					idcodeimage: this.authForm.idcodeimage,
 				}).then(authRes=>{
 					if(authRes.code == 0){
-						uni.navigateBack({
-							success: () => {
-								let page = getCurrentPages().pop();  //跳转页面成功之后
-								if (!page) {
-									return;
-								} else {
-									page.onLoad(page.options);// page自带options对象.
-								}
-							}
-						})
 						uni.showToast({
 							title: authRes.msg,
 							icon: 'success'
 						});
+						setTimeout(()=>{
+							uni.navigateBack({
+								success: () => {
+									let page = getCurrentPages().pop();  //跳转页面成功之后
+									if (!page) {
+										return;
+									} else {
+										page.onLoad(page.options);// page自带options对象.
+									}
+								}
+							})
+						},1000)
 					}else{
-						console.log(authRes.msg,'authres.msg');
 						uni.showToast({
 							title: authRes.msg,
 							icon: 'none'

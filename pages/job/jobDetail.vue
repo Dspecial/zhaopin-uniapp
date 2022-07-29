@@ -58,7 +58,7 @@
 			</view>
 			
 			<!-- 联系方式 -->
-			<view class="info-box p-3 mt-2">
+			<view class="info-box p-3 mt-2" v-if="info.job_type != 2">
 				<view class="d-flex justify-content-between align-items-center">
 					<view class="w-60">
 						<text class="d-block fs_15 box-title pb-3-1">联系方式</text>
@@ -87,27 +87,25 @@
 			</view>
 			
 			<!-- 操作 -->
-			<view class="info-actions px-2">
+			<view class="info-actions px-2" v-if="info.job_type != 2">
 				<view class="d-flex align-items-center justify-content-between uni-goods-nav">
 					<view class="d-flex text-grey">
 						<view class="text-center mr-3" @click="callPhone">
 							<uni-icons type="headphones" size="18"></uni-icons>
 							<view>联系领队</view>
 						</view>
-						<!-- #ifdef H5 -->
 						<view class="text-center mr-3" @click="share">
 							<uni-icons type="redo-filled" size="18"></uni-icons>
 							<view>分享</view>
 						</view>
-						<!-- #endif -->
 						
 						<!-- #ifdef MP-WEIXIN -->
-						<view class="text-center mr-3 share_view">
+						<!-- <view class="text-center mr-3 share_view">
 							<button open-type="share" class="btn-share">
 								<uni-icons type="redo-filled" size="18"></uni-icons>
 								<view>分享</view>
 							</button>
-						</view>
+						</view> -->
 						<!-- #endif -->
 						
 						<view class="text-center mr-3" @click="collect(can_collect)">
@@ -182,6 +180,11 @@
 				</view>
 			</uni-popup>
 			
+		
+			<!-- 跳转第三方页面 -->
+			<view class="d-flex justify-content-center mt-5" v-if="info.job_type == 2 && info.url">
+				<text class="bg-primary-600 my-btn" @click="jumpPosition()">查看岗位</text>
+			</view>
 		</view>
 		<!-- 返回首页 -->
 		<back-home></back-home>
@@ -213,7 +216,9 @@
 					detail:"",
 					contact:"",
 					tel:"",
-					ewmImg:""
+					ewmImg:"",
+					
+					url:"",
 				},
 				// 流程
 				processContent:"",
@@ -359,6 +364,9 @@
 							this.share_h5();
 						}
 						// #endif
+						
+						// 第三方链接
+						this.info.url = res.data.info.url;
 					}else{
 						uni.showToast({
 							title: res.msg,
@@ -366,6 +374,14 @@
 						});
 					}
 				});
+			},
+			
+			
+			// 长期职位的跳转第三方页面
+			jumpPosition(){
+				uni.navigateTo({
+					url:'/pages/webview/webview?url=' + this.info.url
+				})
 			},
 			
 			// 订阅和分享
@@ -588,7 +604,7 @@
 									signcode:signcode,
 								}).then(res=>{
 									this.dialogCode = res.code;
-									if(res.code == 0){
+									if(res.code == 0){ // 报名成功
 										if(res.data.need_pay == 1){ // 要调支付接口
 											this.initDetail(this.sn);
 										}else{
@@ -598,12 +614,12 @@
 											});
 											setTimeout(()=>{
 												uni.setStorageSync('enrolled_activeTab',1);
-												uni.switchTab({
+												uni.reLaunch({
 													url: "/pages/enrolled/enrolled",
 												})
 											},2000)
 										}
-									}else if(res.code == 1){
+									}else if(res.code == 1){ 
 										uni.showToast({
 											title: res.msg,
 											icon: 'none'
@@ -645,12 +661,12 @@
 				}else if(this.dialogCode == '2'){
 					// 跳转实名认证
 					uni.navigateTo({
-						url: "/pages/my/authentication/authentication"
+						url: "/packageMy/pages/my/authentication/authentication"
 					})
 				}else if(this.dialogCode == '3'){
 					// 跳转个人中心-绑定手机号
 					uni.navigateTo({
-						url: "/pages/my/profile/profile?isGoback=1",
+						url: "/packageMy/pages/my/profile/profile",
 					})
 				}else if(this.dialogCode == '4'){
 					// 跳转授权

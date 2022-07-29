@@ -21,6 +21,10 @@
 					</uni-forms-item>
 					<uni-forms-item label=" ">
 						<uni-easyinput v-model="withdrawalForm.amount" placeholder="提现金额" />
+						<!-- 提现提示 -->
+						<view class="mt-2 text-danger fs_12" v-if="tips">
+							温馨提示：请于当月的 {{ tips }} 号申请提现
+						</view>
 						<!-- 可提现金额 -->
 						<view class="mt-2 d-flex justify-content-between fs_12">
 							<view>
@@ -80,14 +84,14 @@
 		data() {
 			return {
 				withdrawalForm:{
-					type:"",
+					type:2,
 					account:"",
 					amount:"",
 				},
 				typeOptions: [
-					{ value: 1, text: "支付宝" },
 					{ value: 2, text: "银行卡" },
 				],
+				tips:"",
 				accountOptions: [],
 				allAmount: "",
 				// 订阅的模板id
@@ -100,6 +104,8 @@
 		},
 		onShow(){
 			this.getBalance();
+			this.initDeposit();
+			this.initBankCardList(2);
 		},
 		methods: {
 			goBack() {
@@ -172,6 +178,22 @@
 								value: item.id
 							}
 						});
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// 获取提现提示
+			initDeposit(){
+				this.$api.aboutUs({
+					name: 'set_deposit',
+				}).then(res=>{
+					if(res.code == 0){
+						this.tips = res.data.value;
 					}else{
 						uni.showToast({
 							title: res.msg,

@@ -20,7 +20,7 @@
 			
 			<view class="card-box mt-3 purse-list pl-3 pr-3">
 				<!-- 我的支付宝 -->
-				<view class="d-flex justify-content-between align-items-center purse-list-item pt-3 pb-3" @click="goAlipay()">
+				<!-- <view class="d-flex justify-content-between align-items-center purse-list-item pt-3 pb-3" @click="goAlipay()">
 					<view class="d-flex align-items-center">
 						<image class="image" :src="purseListIcon1" mode="aspectFit" style="width:29rpx;height:29rpx" />
 						<text class="ml-3 fs_14">我的支付宝</text>
@@ -28,7 +28,7 @@
 					<view>
 						<uni-icons type="right" size="14"></uni-icons>
 					</view>
-				</view>
+				</view> -->
 				
 				<!-- 我的银行卡 -->
 				<view class="d-flex justify-content-between align-items-center purse-list-item pt-3 pb-3" @click="goBankcard()">

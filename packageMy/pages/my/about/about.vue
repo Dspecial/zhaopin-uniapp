@@ -19,9 +19,6 @@
 			}
 		},
 		onLoad(){
-			var eObj = {
-				currentIndex:0
-			};
 			this.initLogo();
 			this.initAbout();
 		},

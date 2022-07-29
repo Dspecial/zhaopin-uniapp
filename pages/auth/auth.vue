@@ -1,10 +1,10 @@
 <template>
-	<view class="page-container my-container">
+	<view class="page-container auth-container">
 		<uni-nav-bar dark :fixed="true" status-bar title="授权登录" :border="false"/>
 		<view class="my-profile">
 			<image class="image profile-bg" :src="authBg" mode="aspectFill" />
 		</view>
-		<view class="p-3">
+		<view class="p-5 auth-content">
 			<image class="image about-logo-image" :src="logo" mode="aspectFit" />
 			<view class="d-flex justify-content-center mt-5">
 				<!-- #ifdef MP-WEIXIN -->
@@ -33,15 +33,26 @@
 		},
 		onLoad(){
 			this.initLogo();
+			
+			// 记录上一页
+			var pages = getCurrentPages(); //当前页
+			var beforePage = pages[pages.length - 2]; //上个页面
+			var beforePageFullPath = "";
+			if(beforePage){
+				beforePageFullPath = "/" + beforePage.route;
+			}else{
+				beforePageFullPath = "/pages/index/index";
+			}
+			// 将上一页的路由保存到storage
+			uni.setStorageSync('beforePageFullPath',beforePageFullPath);
+			
 			// #ifdef H5
-			// 判断H5是微信还是pc
-			let ua = navigator.userAgent.toLowerCase();
-			if (ua.match(/MicroMessenger/i) == "micromessenger") {
+			// 判断H5是微信还是其他浏览器
+			if(this.isWeChat){
 				// console.log('微信浏览器');
-				
 				// 获取当前页面的url
 				let link = window.location.href;
-				let code = this.getUrlCode('code')
+				let code = this.getUrlCode('code');
 				// 判断link中有没有code=字符串，  
 				if (code == null || code == '') {
 					//没有code= 发请求
@@ -49,24 +60,13 @@
 					let uri = encodeURIComponent(link); // 编码后的回调地址
 					let authURL = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid='+ appid +'&redirect_uri='+ uri +'&response_type=code&scope=snsapi_userinfo&state=STATE&connect_redirect=1#wechat_redirect';
 					window.location.href = authURL;
-					
-					// 记录上一页
-					var pages = getCurrentPages(); //当前页
-					var beforePage = pages[pages.length - 2]; //上个页面
-					var beforePageFullPath = beforePage.__page__.fullPath;
-					uni.setStorageSync('beforePageFullPath',beforePageFullPath);
 				} else {
 					// 微信公众号授权后调接口-跳转
 					this.wx_auth(code);
 				}
 			}else{
-				// 记录上一页
-				var pages = getCurrentPages(); //当前页
-				var beforePage = pages[pages.length - 2]; //上个页面
-				var beforePageFullPath = beforePage.__page__.fullPath;
-				uni.setStorageSync('beforePageFullPath',beforePageFullPath);
-				console.log('普通浏览器');
-			}
+				// console.log('普通浏览器');
+			};
 			// #endif
 		},
 		methods: {
@@ -103,26 +103,40 @@
 							provider: 'weixin',
 							success: (res) => {
 								if (res.errMsg == 'login:ok') {
-									this.$api.mini_wx_auth({
+									this.$api.get_mini_auth({
 										code: res.code,
 										encryptedData:obj.encryptedData,
 										iv:obj.iv
 									}).then(authRes=>{
 										if(authRes.code == 0){
-											uni.setStorageSync('user_token',authRes.data);
-											uni.navigateBack({
-												success: () => {
-													let page = getCurrentPages().pop();  //跳转页面成功之后
-													if (!page) {
-														return;
-													} else {
-														page.onLoad(page.options);// page自带options对象.
-													}
-												}
-											})
+											if(authRes.data.need_login == 1){ // 是第一次授权，需要跳转到注册页面
+												uni.setStorageSync('user_info',authRes.data.data);
+												uni.reLaunch({
+													url: '/pages/register/register',
+												})
+											}else{
+												uni.showToast({
+													title: '已授权',
+													icon: 'success'
+												});
+												uni.setStorageSync('user_token',authRes.data.data);
+												setTimeout(()=>{
+													uni.navigateBack({
+														success: () => {
+															let page = getCurrentPages().pop();  //跳转页面成功之后
+															if (!page) {
+																return;
+															} else {
+																page.onLoad(page.options);// page自带options对象.
+															}
+														}
+													})
+												},1000)
+											}
+											
 										}else{
 											uni.showToast({
-												title: authres.msg,
+												title: authRes.msg,
 												icon: 'none'
 											});
 										}
@@ -146,20 +160,26 @@
 				//#endif
 				
 				// #ifdef H5
-				let ua = navigator.userAgent.toLowerCase();
-				if (ua.match(/MicroMessenger/i) == "micromessenger") {
+				if(this.isWeChat){
 					// console.log('微信浏览器');
 					// 微信公众号授权后调接口-跳转
 					let link = window.location.href;
-					this.wx_auth(link);
+					let code = this.getUrlCode('code');
+					this.wx_auth(code);
 				}else{
 					// console.log('普通浏览器');
+					uni.showToast({
+						title: '普浏直接登录',
+						icon: 'success'
+					});
 					// 写死一个token
 					uni.setStorageSync('user_token','62bbc9bd759eb1656474045642861');
 					var beforePageFullPath = uni.getStorageSync('beforePageFullPath');
-					uni.reLaunch({
-						url: beforePageFullPath,
-					})
+					setTimeout(()=>{
+						uni.reLaunch({
+							url: beforePageFullPath,
+						})
+					},1000)
 				}
 				// #endif
 			},
@@ -173,16 +193,28 @@
 			// 微信公众号授权后调接口-跳转
 			wx_auth(code){
 				// 接口的跳转
-				this.$api.wx_wx_auth({
+				this.$api.get_wx_auth({
 					code:code,
 					signcode:"",
 				}).then(authRes => {
 					if(authRes.code == 0){
-						uni.setStorageSync('user_token',authRes.data);
-						var beforePageFullPath = uni.getStorageSync('beforePageFullPath');
-						console.log(beforePageFullPath,'beforePageFullPathbeforePageFullPath');
-						var url_g = window.location.href.split("?")[0];
-						window.location.href = url_g + "#" + beforePageFullPath;
+						if(authRes.data.need_login == 1){ // 是第一次授权，需要跳转到注册页面
+							uni.setStorageSync('user_info',authRes.data.data);
+							uni.reLaunch({
+								url: '/pages/register/register',
+							})
+						}else{
+							uni.showToast({
+								title: '已授权',
+								icon: 'success'
+							});
+							uni.setStorageSync('user_token',authRes.data.data);
+							var beforePageFullPath = uni.getStorageSync('beforePageFullPath');
+							var url_g = window.location.href.split("?code=")[0];
+							setTimeout(()=>{
+								window.location.href = url_g + "#" + beforePageFullPath;
+							},1000)
+						}
 					}else{
 						uni.showToast({
 							title: authres.msg,
