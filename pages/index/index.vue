@@ -39,7 +39,7 @@
 				</uni-row>
 			</view>
 			<!-- adv2 -->
-			<view class="mt-2 adv2-box">
+			<view class="mt-2 adv2-box" v-if="adv2Img">
 				<image class="image" :src="adv2Img" mode="scaleToFill" />
 			</view>
 			<!-- 为你推荐 -->
@@ -131,11 +131,11 @@
 						subtitle:"平均涨薪60%",
 					},
 				],
-				adv2Img:require("@/static/index/adv2Img.png"),
+				adv2Img:"",
 				personsIcon:require("@/static/index/personsIcon.png"),
 				recommendList:[],
 				currentPage:1,
-				pageSize:5,
+				pageSize:10,
 				total:0,
 				loadStatus:"more",
 			}
@@ -154,6 +154,7 @@
 			}else{
 				this.getLocation();
 			}
+			this.initAdv2Img();
 		},
 		methods: {
 			// 获取当前定位
@@ -254,7 +255,23 @@
 					url: "/pages/job/job",
 				})
 			},
-	
+			
+			// 获取第二个广告位
+			initAdv2Img(){
+				this.$api.aboutUs({
+					name: 'middle_img',
+				}).then(res=>{
+					if(res.code == 0){
+						this.adv2Img = this.$globalUrl.baseUrl + res.data.value;
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
 			// 推荐-查看全部
 			viewMore(){
 				uni.switchTab({
@@ -324,7 +341,7 @@
 		onPullDownRefresh(){
 			this.loadStatus = "more";
 			this.currentPage = 1;
-			this.pageSize = 5;
+			this.pageSize = 10;
 			this.total = 0;
 			this.initRecommendList(this.city_id);
 			setTimeout(function () {

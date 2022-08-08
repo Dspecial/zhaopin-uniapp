@@ -46,7 +46,7 @@
 			<!-- 工作流程 -->
 			<view class="info-box p-3 mt-2" v-if="processContent">
 				<text class="d-block fs_15 box-title pb-3-1">工作流程</text>
-				<view v-html="processContent" class="processContent"></view>
+				<view v-html="processContent" class="processContent mt-3"></view>
 			</view>
 			
 			<!-- 招聘详情 -->

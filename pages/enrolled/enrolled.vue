@@ -84,7 +84,7 @@
 				personsIcon:require("@/static/index/personsIcon.png"),
 				tab_content_list:[],
 				currentPage:1,
-				pageSize:5,
+				pageSize:10,
 				total:0,
 				loadStatus:"more",
 			}
@@ -123,7 +123,7 @@
 				uni.setStorageSync('enrolled_activeTab',e.currentIndex);
 				this.loadStatus = "more";
 				this.currentPage = 1;
-				this.pageSize = 5;
+				this.pageSize = 10;
 				this.total = 0;
 				this.initEnrolledList(this.currentTab);
 			},
@@ -196,7 +196,7 @@
 								});
 								this.loadStatus = "more";
 								this.currentPage = 1;
-								this.pageSize = 5;
+								this.pageSize = 10;
 								this.total = 0;
 								this.initEnrolledList(this.currentTab);
 							});
@@ -223,7 +223,7 @@
 		onPullDownRefresh(){
 			this.loadStatus = "more";
 			this.currentPage = 1;
-			this.pageSize = 5;
+			this.pageSize = 10;
 			this.total = 0;
 			this.initEnrolledList(this.currentTab);
 			setTimeout(function () {

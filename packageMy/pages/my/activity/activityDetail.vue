@@ -53,7 +53,7 @@
 			<!-- 工作流程 -->
 			<view class="info-box p-3 mt-2" v-if="processContent">
 				<text class="d-block fs_15 box-title pb-3-1">工作流程</text>
-				<view v-html="processContent" class="processContent"></view>
+				<view v-html="processContent" class="processContent mt-3"></view>
 			</view>
 			
 			<!-- 招聘详情 -->
@@ -111,9 +111,22 @@
 					<template v-for="(tabItem,index) in signTab">
 						<view :class="['fs_12 sign-tab-item px-2 py-1 m-1',activeTab == (index+1)?'active':'']" @click="changeTab(index)">
 							<text>{{ tabItem.title }}</text>
-							<text class="num">{{ tabItem.value }}</text><text v-if="tabItem.value !== ''">人</text>
+							<text>{{ tabItem.value }}</text><text v-if="tabItem.value !== ''">人</text>
 						</view>
 					</template>
+				</view>
+				
+				<!-- 全局功能 -->
+				<view class="d-flex mt-2">
+					<view class="my-btn bg-primary-600 px-3 py-1 d-flex align-items-center" @click="multiSignPop()">
+						<uni-icons type="calendar-filled" size="16" color="#ffffff"></uni-icons>
+						<text class="ml-1">一键签到</text>
+					</view>
+					<view class="my-btn bg-primary-600 px-3 py-1 d-flex align-items-center ml-2" @click="allSort(orderType)">
+						<uni-icons type="list" size="16" color="#ffffff"></uni-icons>
+						<text class="ml-1" v-if="orderType == 1">正序</text>
+						<text class="ml-1" v-else-if="orderType == 2">倒序</text>
+					</view>
 				</view>
 				
 				<!-- 已报名人员 -->
@@ -138,9 +151,8 @@
 								</view>
 							</view>
 							<view v-if="list.is_check == 3">
-								<view class="text-primary-600 mr-2 d-flex align-items-center justify-content-end" @click="signPop(list)">
-									<uni-icons type="calendar-filled" size="16" color="#435AE0"></uni-icons>
-									<text>签到</text>
+								<view class="action d-flex justify-content-end mt-2">
+									<text class="my-btn" @click="signPop(list)">签到</text>
 								</view>
 								<view class="action d-flex justify-content-end mt-2">
 									<text class="my-btn" @click="evaluate(list)">评价</text>
@@ -254,6 +266,36 @@
 					<uni-load-more :status="loadStatus"></uni-load-more>
 				</view>
 				
+				<!-- 一键签到的pop -->
+				<uni-popup ref="multiSignPopup" @change="multiSignPopupChange" :safe-area="false">
+					<view class="bg-white signPopup">
+						<uni-section title="一键签到" type="line">
+							<uni-forms :modelValue="multiSignForm" label-position="top">
+								<view class="px-3">
+									<uni-forms-item label="签到人员" name="persons">
+										<select-cy :value="multiSignForm.persons" placeholder="请选择签到人员" :options="personOptions":zindex="1" @change="changePerson"></select-cy>
+									</uni-forms-item>
+									<uni-forms-item label="签到日期" name="date">
+										<uni-data-select v-model="multiSignForm.date" :clear="false" 
+											:localdata="dateOptions"
+											placeholder="请选择签到日期">
+										</uni-data-select>
+									</uni-forms-item>
+									<uni-forms-item label="签到类型" name="type">
+										<uni-data-select v-model="multiSignForm.type" :clear="false" 
+											:localdata="typeOptions"
+											placeholder="请选择签到类型">
+										</uni-data-select>
+									</uni-forms-item>
+								</view>
+							</uni-forms>
+							<view class="text-center pt-5 pb-5">
+								<text class="my-btn bg-primary-600 fs_13" @click="multiSignInOut_replace()">一键签到</text>
+							</view>
+						</uni-section>
+					</view>
+				</uni-popup>
+				
 				<!-- 签到的pop -->
 				<uni-popup ref="signPopup" @change="signPopupChange" :safe-area="false">
 					<view class="bg-white signPopup">
@@ -356,7 +398,11 @@
 </template>
 
 <script>
+	import SelectCy from "@/packageMy/components/select-cy/select-cy.vue";
 	export default {
+		components:{
+			SelectCy,
+		},
 		data() {
 			return {
 				sn:"",
@@ -412,13 +458,29 @@
 						title:"未签到",
 						value:""
 					},
+					{
+						title:"已签退",
+						value:""
+					},
+					{
+						title:"未签退",
+						value:""
+					},
 				],
-				activeTab:-1,
+				activeTab:'',
 				registerList:[],
 				currentPage:1,
-				pageSize:5,
+				pageSize:10,
 				total:0,
 				loadStatus:"more",
+				// 一键签到
+				multiSignForm:{
+					persons:[],
+					type:"",
+					date:"",
+				},
+				orderType:'1', // order_type不传或者传1 倒序 传2正序
+				personOptions:[],
 				// 签到、签退照片展示
 				showImagesIndex:-1,
 				signForm:{
@@ -465,7 +527,7 @@
 		onShow:function(){
 			this.initDetail(this.sn);
 			this.initPersonNum(this.sn);
-			this.initSign(this.sn,'');
+			this.initSign(this.sn,'','');
 		},
 		
 		methods: {
@@ -514,8 +576,10 @@
 							}
 						});
 						
+						// 获取随机数
+						var randomNum = Math.random()
 						// 签到码
-						this.posterImg = this.$globalUrl.baseUrl + res.data.info.wx_signimage;
+						this.posterImg = this.$globalUrl.baseUrl + res.data.info.wx_signimage + '?_=' + randomNum;
 					}else{
 						uni.showToast({
 							title: res.msg,
@@ -539,8 +603,10 @@
 						this.signTab[1].value = res.data.sign_load_check_count; // 待审核人数
 						this.signTab[2].value = res.data.sign_check_count; // 已通过人数
 						this.signTab[3].value = res.data.sign_no_pass_count; // 不通过人数
-						// this.signTab[4].value = res.data.sign_count; // 已签到人数
-						// this.signTab[5].value = res.data.sign_count; // 未签到人数
+						this.signTab[4].value = res.data.has_sign_count; // 已签到人数
+						this.signTab[5].value = res.data.has_no_sign_count; // 未签到人数
+						this.signTab[6].value = res.data.has_sign_back_count; // 已签退人数
+						this.signTab[7].value = res.data.has_no_sign_back_count; // 未签退人数
 					}else{
 						uni.showToast({
 							title: res.msg,
@@ -554,11 +620,11 @@
 			changeTab(index){
 				this.activeTab = index+1;
 				this.currentPage = 1;
-				this.initSign(this.sn,this.activeTab);
+				this.initSign(this.sn,this.activeTab,this.orderType);
 			},
 			
 			// 获取签到+报名
-			initSign(sn,type){
+			initSign(sn,type,order_type){
 				this.$api.activitySignList({
 					sn:sn,
 					token:uni.getStorageSync('user_token'),
@@ -567,6 +633,7 @@
 					keywords:this.searchValue,
 					date:this.searchDate,
 					type:type,
+					order_type:order_type,
 				}).then(res=>{
 					if(res.code == 0){
 						this.total = res.data.sign_list.total;
@@ -671,9 +738,9 @@
 			search(){
 				this.loadStatus = "more";
 				this.currentPage = 1;
-				this.pageSize = 5;
+				this.pageSize = 10;
 				this.total = 0;
-				this.initSign(this.sn,this.activeTab);
+				this.initSign(this.sn,this.activeTab,this.orderType);
 			},
 			
 			// 拨打电话
@@ -699,6 +766,120 @@
 				}else{
 					this.showImagesIndex = index;
 				};
+			},
+			
+			// 一键签到的弹窗打开
+			multiSignPop(){
+				this.$refs.multiSignPopup.open('bottom');
+				this.initPersonList();
+			},
+			
+			// 签到弹窗状态改变
+			multiSignPopupChange(e){
+				if(!e.show){
+					this.multiSignForm = {
+						persons:[],
+						type:"",
+						date:"",
+					};
+				}
+			},
+			
+			// 获取审核人员
+			initPersonList(){
+				this.$api.personList({
+					token:uni.getStorageSync('user_token'),
+					sn:this.sn,
+				}).then(res=>{
+					if(res.code == 0){
+						this.personOptions = res.data.map((item,index)=>{
+							return {
+								label:item.truename + '（' + item.mobile + '）',
+								value:item.id,
+							}
+						});
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// 切换人员选择
+			changePerson(item,value){
+				this.multiSignForm.persons = value;
+			},
+			
+			// 一键签到
+			multiSignInOut_replace(){
+				var signtype = 0;
+				// #ifdef H5
+				signtype = 1;
+				// #endif
+				
+				// #ifdef MP-WEIXIN
+				signtype = 2;
+				// #endif
+				
+				uni.showToast({
+					title: '加载中……',
+					icon: 'loading',
+					duration: 3000,
+				})
+				var sign_title = "";
+				if(this.multiSignForm.type == 1){ // 签到
+					sign_title = "一键签到";
+				}else if(this.multiSignForm.type == 2){ // 签退
+					sign_title = "一键签退";
+				}
+				
+				uni.showModal({
+					title: '温馨提示',
+					content: '请确认是否' + sign_title,
+					confirmText: '确定',
+					cancelText: '取消',
+					success: (modal_res) => {
+						if (modal_res.confirm) {
+							// 调代替签到的接口-批量签到
+							this.$api.multiSign({
+								token:uni.getStorageSync('user_token'),
+								sn:this.sn,
+								ids:this.multiSignForm.persons.join(","),
+								date:this.multiSignForm.date,
+								sign_type:this.multiSignForm.type,
+								signtype:signtype,
+							}).then(res=>{
+								if(res.code == 0){
+									uni.showToast({
+										title: sign_title + '成功',
+										icon: 'success'
+									});
+									this.$refs.multiSignPopup.close();
+									this.search();
+								}else{
+									uni.showToast({
+										title: res.msg,
+										icon: 'none'
+									});
+								}
+							});
+						} else if (modal_res.cancel) {
+							console.log('关闭');
+						}
+					}
+				});
+			},
+			
+			// 排序
+			allSort(orderType){
+				if(orderType == '1'){
+					this.orderType = '2';
+				}else if(orderType == '2'){
+					this.orderType = '1';
+				};
+				this.initSign(this.sn,this.activeTab,this.orderType);
 			},
 			
 			// 签到的弹窗打开
@@ -999,7 +1180,7 @@
 		onReachBottom() {
 			this.currentPage++;
 			if (this.registerList.length < this.total) {
-				this.initSign(this.sn,this.activeTab);
+				this.initSign(this.sn,this.activeTab,this.orderType);
 			} else {
 				uni.hideNavigationBarLoading();
 				this.loadStatus = "no-more";
@@ -1010,9 +1191,9 @@
 		onPullDownRefresh(){
 			this.loadStatus = "more";
 			this.currentPage = 1;
-			this.pageSize = 5;
+			this.pageSize = 10;
 			this.total = 0;
-			this.initSign(this.sn);
+			this.initSign(this.sn,this.activeTab,this.orderType);
 			setTimeout(function () {
 				uni.stopPullDownRefresh();  //停止下拉刷新动画
 			}, 1000);

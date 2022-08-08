@@ -201,6 +201,15 @@
 		.recommend-item{
 			border: 2rpx solid var(--grey-50);
 			border-radius: 15rpx;
+			.header{
+				justify-content: space-between;
+				>.fs_14{
+					width: 70%;
+					text-overflow: ellipsis;
+					overflow: hidden;
+					white-space: nowrap;
+				}
+			}
 			.pay{
 				color: var(--primary);
 			}

@@ -173,7 +173,7 @@
 						icon: 'success'
 					});
 					// 写死一个token
-					uni.setStorageSync('user_token','62bbc9bd759eb1656474045642861');
+					uni.setStorageSync('user_token','62f0b43cb915b1659941948555194');
 					var beforePageFullPath = uni.getStorageSync('beforePageFullPath');
 					setTimeout(()=>{
 						uni.reLaunch({

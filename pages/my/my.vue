@@ -34,6 +34,16 @@
 				</view>
 			</view>
 		</view>
+		<!-- 邀请码 -->
+		<view class="pt-3 pl-3 pr-3">
+			<uni-notice-bar
+				v-if="inviteCode"
+				class="mb-0"
+				show-get-more 
+				more-text="复制" 
+				:text="'邀请码：'+inviteCode"
+				@getmore="getCopy(inviteCode)" />
+		</view>
 		<view class="p-3">
 			<!-- 我的报名 -->
 			<view class="card-box p-3 my-enroll">
@@ -137,6 +147,7 @@
 		data() {
 			return {
 				user_token:uni.getStorageSync('user_token'),
+				inviteCode:'', // 邀请码
 				profileBg: require("@/packageMy/static/my/my_navbar_profile.png"),
 				telImg: require("@/packageMy/static/my/phone.png"),
 				balanceIcon: require("@/packageMy/static/my/balance_icon.png"),
@@ -200,6 +211,20 @@
 				})
 			},
 			
+			// 复制
+			getCopy(value){
+				uni.setClipboardData({
+					data: value,
+					success: function () {
+						// 调用方法成功
+						uni.showToast({
+							title: '邀请码已复制',
+							icon: 'success'
+						});
+					}
+				})
+			},
+			
 			// 获取用户信息
 			getProfileInfo(token){
 				this.$api.profileInfo({
@@ -217,6 +242,8 @@
 						}else{
 							this.profile.avatar = this.$globalUrl.baseUrl + res.data.avatar;
 						}
+						
+						this.inviteCode = res.data.invite_code
 					}else{
 						uni.showToast({
 							title: res.msg,

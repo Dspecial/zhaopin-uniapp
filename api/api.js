@@ -389,7 +389,25 @@ export default {
 			data: params, // 请求数据
 		})
 	},
-		
+
+	// 获取一键签到里的审核人员
+	personList: (params) => {
+		return request({
+			url: "/api/charger/get_member_list", // 请求url
+			method: "POST", // 请求方式
+			data: params, // 请求数据
+		})
+	},
+	
+	// 一键签到
+	multiSign: (params) => {
+		return request({
+			url: "/api/charger/multi_sign", // 请求url
+			method: "POST", // 请求方式
+			data: params, // 请求数据
+		})
+	},
+	
 	// 获取活动详情-签到+报名
 	activitySignList: (params) => {
 		return request({

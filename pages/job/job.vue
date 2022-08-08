@@ -62,7 +62,7 @@
 				personsIcon:require("@/static/index/personsIcon.png"),
 				tab_content_list:[],
 				currentPage:1,
-				pageSize:5,
+				pageSize:10,
 				total:0,
 				loadStatus:"more",
 			}
@@ -90,7 +90,7 @@
 				uni.setStorageSync('job_activeTab',e.currentIndex);
 				this.loadStatus = "more";
 				this.currentPage = 1;
-				this.pageSize = 5;
+				this.pageSize = 10;
 				this.total = 0;
 				this.initJobList(this.currentTab + 1);
 			},
@@ -158,7 +158,7 @@
 		onPullDownRefresh(){
 			this.loadStatus = "more";
 			this.currentPage = 1;
-			this.pageSize = 5;
+			this.pageSize = 10;
 			this.total = 0;
 			this.initJobList(this.currentTab + 1);
 			setTimeout(function () {

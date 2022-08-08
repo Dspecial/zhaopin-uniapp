@@ -13,7 +13,7 @@
 							<uni-easyinput type="number" prefixIcon="person-filled" :inputBorder="false" v-model="registerForm.mobile" placeholder="请输入手机号" />
 						</uni-forms-item>
 						<uni-forms-item label=" ">
-							<uni-easyinput type="password" prefixIcon="locked-filled" :inputBorder="false" v-model="registerForm.password" placeholder="请输入密码" />
+							<uni-easyinput prefixIcon="personadd" :inputBorder="false" v-model="registerForm.invite_code" placeholder="请输入邀请码(选填)" />
 						</uni-forms-item>
 					</view>
 				</uni-forms>
@@ -39,7 +39,7 @@
 				agreementName:"",
 				registerForm:{
 					mobile:"",
-					password:"",
+					invite_code:"",
 					is_agree:'',
 				},
 				localdata:[
@@ -100,6 +100,7 @@
 					headimgurl:user_info.headimgurl,
 					is_agree:this.registerForm.is_agree,
 					mobile:this.registerForm.mobile,
+					invite_code:this.registerForm.invite_code,
 					type:plateform,
 				}).then(res=>{
 					if(res.code == 0){
