@@ -402,42 +402,50 @@
 				}else if(type == 2){ // 签退
 					sign_title = "签退";
 				}
-				
-				uni.showModal({
-					title: '温馨提示',
-					content: '请确认是否' + sign_title,
-					confirmText: '确定',
-					cancelText: '取消',
-					success: (modal_res) => {
-						if (modal_res.confirm) {
-							// 调签到的接口
-							this.$api.sign({
-								token:uni.getStorageSync('user_token'),
-								id:this.id,
-								longitude:this.info.longitude,
-								latitude:this.info.latitude,
-								sign_type:type,
-								signtype:signtype,
-							}).then(res=>{
-								if(res.code == 0){
-									uni.showToast({
-										title: sign_title + '成功',
-										icon: 'success'
+				var _longitude,_latitude;
+				uni.getLocation({
+					type: 'wgs84',
+					geocode: true,  
+					success: location_res => {
+						uni.showModal({
+							title: '温馨提示',
+							content: '请确认是否' + sign_title,
+							confirmText: '确定',
+							cancelText: '取消',
+							success: (modal_res) => {
+								if (modal_res.confirm) {
+									// 调签到的接口
+									this.$api.sign({
+										token:uni.getStorageSync('user_token'),
+										id:this.id,
+										longitude:location_res.longitude,
+										latitude:location_res.latitude,
+										sign_type:type,
+										signtype:signtype,
+									}).then(res=>{
+										if(res.code == 0){
+											uni.showToast({
+												title: sign_title + '成功',
+												icon: 'success'
+											});
+											this.initDetail(this.id);
+										}else{
+											uni.showToast({
+												title: res.msg,
+												icon: 'none'
+											});
+										}
 									});
-									this.initDetail(this.id);
-								}else{
-									uni.showToast({
-										title: res.msg,
-										icon: 'none'
-									});
+								} else if (modal_res.cancel) {
+									console.log('关闭');
 								}
-							});
-						} else if (modal_res.cancel) {
-							console.log('关闭');
-						}
-					}
+							}
+						});
+					},
+					fail: (location_err) => {
+						console.log('err ==>',location_err);
+					},
 				});
-				
 			},
 			
 			// 取消报名

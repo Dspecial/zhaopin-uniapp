@@ -518,6 +518,7 @@
 								mobile:"",
 								balance:"0.00"
 							};
+							this.inviteCode = undefined;
 							
 							// #ifdef H5
 							window.location.href = window.location.href;

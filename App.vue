@@ -88,7 +88,7 @@
 			// 订阅消息
 			subscribeShare(){
 				this.$api.share({
-					url: "http://h5.yuezhongkeji.com/web/",
+					url: "https://h5.yuezhongkeji.com/web/",
 				}).then(res=>{
 					if(res.code == 0){
 						jweixin.config({

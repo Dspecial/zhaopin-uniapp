@@ -10,10 +10,10 @@ let globalUrl = {
  
 if(process.env.NODE_ENV === 'development'){
   // 开发环境 配置ip地址端口号
-  globalUrl.baseUrl = 'http://h5.yuezhongkeji.com'
+  globalUrl.baseUrl = 'https://h5.yuezhongkeji.com'
 }else{
   // 生产环境
-  globalUrl.baseUrl = 'http://h5.yuezhongkeji.com'
+  globalUrl.baseUrl = 'https://h5.yuezhongkeji.com'
 }
  
 export default globalUrl;

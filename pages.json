@@ -18,7 +18,7 @@
 		{
 			"path" : "pages/index/bannerDetail/bannerDetail",
 			"style" : {
-				"navigationBarTitleText": "悦众科技",
+				"navigationBarTitleText": "悦众职聘",
 				"enablePullDownRefresh": false
 			}	
 		},
@@ -206,7 +206,7 @@
 	"globalStyle": {
 		"navigationStyle": "custom", // 设置成 custom 即可解决微信H5双标题的问题
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "悦众科技",
+		"navigationBarTitleText": "悦众职聘",
 		"navigationBarBackgroundColor": "#435AE0",
 		"backgroundColor": "#435AE0"
 	},

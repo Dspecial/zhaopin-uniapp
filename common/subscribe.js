@@ -50,7 +50,7 @@ function Init(e) {
 		}));
 		
 		// let redirect_url = encodeURIComponent(location.href);
-		let redirect_url = encodeURIComponent("http://h5.yuezhongkeji.com");
+		let redirect_url = encodeURIComponent("https://h5.yuezhongkeji.com");
 		let appId = this.$globalUrl.appId; // 公众号的固定appid
 		location.href =
 			`https://mp.weixin.qq.com/mp/subscribemsg?action=get_confirm&appid=${appId}&scene=${scene_id}&template_id=${template_id}&redirect_url=${redirect_url}#wechat_redirect`;
