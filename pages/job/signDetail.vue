@@ -84,7 +84,18 @@
 					</view>
 				</view>
 			</view>
-
+			
+			<!-- 招聘方信息 -->
+			<view class="info-box p-3 mt-2">
+				<text class="d-block fs_15 box-title pb-3-1">招聘方信息</text>
+				<view class="mt-3-1">
+					<view class="d-flex align-items-center">
+						<image class="image avatar-image" :src="info.cm_image" mode="aspectFit" />
+						<text class="ml-2">{{ info.cm_name}}</text>
+					</view>
+				</view>
+			</view>
+			
 			<!-- 签到 -->
 			<view class="d-flex justify-content-center mt-5">
 				<text class="bg-primary-600 my-btn" @click="showSign()">签到</text>
@@ -138,6 +149,9 @@
 					contact:"",
 					tel:"",
 					ewmImg:"",
+					
+					cm_image:"",
+					cm_name:"",
 				},
 				// 流程
 				processContent:"",
@@ -197,6 +211,17 @@
 						this.info.tel = res.data.info.mobile;
 						this.info.ewmImg = this.$globalUrl.baseUrl + res.data.info.codeimage;
 						
+						// 招聘方信息
+						if( res.data.info.cm_image ){
+							if(res.data.info.cm_image.indexOf("http") >= 0){
+								this.info.cm_image = res.data.info.cm_image;
+							}else{
+								this.info.cm_image = this.$globalUrl.baseUrl + res.data.info.cm_image;
+							}
+						}else{
+							this.info.cm_image = require("@/static/default_avatar.png")
+						}
+						this.info.cm_name = res.data.info.cm_name;
 					}else{
 						uni.showToast({
 							title: res.msg,

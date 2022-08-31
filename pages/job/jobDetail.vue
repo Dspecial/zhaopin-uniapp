@@ -74,13 +74,24 @@
 				</view>
 			</view>
 			
+			<!-- 招聘方信息 -->
+			<view class="info-box p-3 mt-2">
+				<text class="d-block fs_15 box-title pb-3-1">招聘方信息</text>
+				<view class="mt-3-1">
+					<view class="d-flex align-items-center">
+						<image class="image avatar-image" :src="info.cm_image" mode="aspectFit" />
+						<text class="ml-2">{{ info.cm_name}}</text>
+					</view>
+				</view>
+			</view>
+			
 			<!-- 报名人员 -->
 			<view class="info-box pt-3 pl-3 pr-3 mt-2 applicant-box" v-if="info.job_type != 2">
 				<text class="d-block fs_15 box-title pb-3-1">{{ applicant.length }}人已报名</text>
 				<scroll-view class="scroll-view_H mt-3-1" scroll-x="true" @scroll="scroll" scroll-left="120">
 					<template v-for="(item,index) in applicant">
 						<view class="scroll-view-item_H pb-3-1 mr-2" :key="index">
-							<image class="image avatar-image" :src="item.avatar" mode="aspectFill" />
+							<image class="image avatar-image" :src="item.avatar" mode="aspectFit" />
 						</view>
 					</template>
 				</scroll-view>
@@ -218,6 +229,9 @@
 					tel:"",
 					ewmImg:"",
 					
+					cm_image:"",
+					cm_name:"",
+					
 					url:"",
 				},
 				// 流程
@@ -313,12 +327,28 @@
 						this.info.tel = res.data.info.mobile;
 						this.info.ewmImg = this.$globalUrl.baseUrl + res.data.info.codeimage;
 						
+						// 招聘方信息
+						if( res.data.info.cm_image ){
+							if(res.data.info.cm_image.indexOf("http") >= 0){
+								this.info.cm_image = res.data.info.cm_image;
+							}else{
+								this.info.cm_image = this.$globalUrl.baseUrl + res.data.info.cm_image;
+							}
+						}else{
+							this.info.cm_image = require("@/static/default_avatar.png")
+						}
+						this.info.cm_name = res.data.info.cm_name;
+						
 						// 报名列表
 						this.applicant = res.data.sign_info.list.map((item,index)=>{
-							if(item.avatar.indexOf("http") >= 0){
-								item.avatar = item.avatar;
+							if(item.avatar){
+								if(item.avatar.indexOf("http") >= 0){
+									item.avatar = item.avatar;
+								}else{
+									item.avatar = this.$globalUrl.baseUrl + item.avatar;
+								}
 							}else{
-								item.avatar = this.$globalUrl.baseUrl + item.avatar;
+								item.avatar = require("@/static/default_avatar.png")
 							}
 							return item;
 						})

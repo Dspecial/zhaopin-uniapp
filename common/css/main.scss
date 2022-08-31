@@ -381,30 +381,30 @@
 			}
 		}
 	}
-	.uni-popup__wrapper{
-		.posterPopup{
-			background-color: #fff;
-			text-align: center;
-			border-radius: 20rpx;
-			box-sizing: border-box;
-			margin-top:40rpx;
-			.poster-image{
-				width:560rpx;
-				height: 1000rpx;
-				margin:0 auto;
-			}
+}
+.uni-popup__wrapper{
+	.posterPopup{
+		background-color: #fff;
+		text-align: center;
+		border-radius: 20rpx;
+		box-sizing: border-box;
+		margin-top:40rpx;
+		.poster-image{
+			width:560rpx;
+			height: 1000rpx;
+			margin:0 auto;
 		}
-		.signCodePopup{
-			background-color: #fff;
-			text-align: center;
-			border-radius: 20rpx;
-			box-sizing: border-box;
-			margin-top:40rpx;
-			.signcode-image{
-				width: 400rpx;
-				height: 400rpx;
-				margin:0 auto;
-			}
+	}
+	.signCodePopup{
+		background-color: #fff;
+		text-align: center;
+		border-radius: 20rpx;
+		box-sizing: border-box;
+		margin-top:40rpx;
+		.signcode-image{
+			width: 400rpx;
+			height: 400rpx;
+			margin:0 auto;
 		}
 	}
 }
@@ -420,7 +420,6 @@
 		border:none!important;
 	}
 }
-
 
 // my.vue
 .card-box{
@@ -771,7 +770,7 @@
 // alipay.vue
 .alipayList{
 	.alipayList-item{
-		position: relative;
+		// position: relative;
 		.image.alipay-bg-image{
 			width: 100%;
 			height: 128rpx;
@@ -788,6 +787,13 @@
 			transform: translate(0,-50%);
 		}
 	}
+}
+.swipe-right{
+	z-index:999;
+}
+.swipe-btn{
+	width: 144rpx;
+	height: 100%;
 }
 
 
@@ -816,6 +822,14 @@
 		font-weight: 400!important;
 		font-size: 28rpx!important;
 	}
+}
+
+.accountItem{
+	border: 2rpx solid var(--grey-25);
+	border-radius: 10rpx;
+}
+.accountItem.active{
+	border: 2rpx solid var(--primary);
 }
 
 // withdrawalDetail.vue
@@ -883,7 +897,14 @@
 		border-top:2rpx solid #ebeef5;
 	}
 }
-
+.bankCardPopup{
+	.uni-forms{
+		overflow-y: auto;
+		overflow-x: hidden;
+		min-height: 500rpx;
+		max-height: 870rpx;
+	}
+}
 .signPopup{
 	.uni-stat__select{
 		padding: 0!important;

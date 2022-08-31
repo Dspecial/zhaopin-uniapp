@@ -71,9 +71,29 @@
 								{{ cell.brief }}
 							</view>
 							<view class="footer">
-								<view class="">
-									<uni-icons type="calendar-filled" size="14"></uni-icons>
-									<text class="fs_11 ml-1">{{ cell.startdate }} - {{ cell.enddate }}</text>
+								<view class="d-flex justify-content-between align-items-center">
+									<view>
+										<uni-icons type="calendar-filled" size="14"></uni-icons>
+										<text class="fs_11 ml-1">{{ cell.startdate }} - {{ cell.enddate }}</text>
+									</view>
+									<view class="my-1">
+										<!-- 1=已停招  2=报名中  3=进行中 4=已结束 5=已招满 -->
+										<template v-if="cell.state == 1">
+											<uni-tag :circle="true" text="已停招" type="error" size="small" />
+										</template>
+										<template v-if="cell.state == 2">
+											<uni-tag :circle="true" text="报名中" type="primary" size="small" />
+										</template>
+										<template v-if="cell.state == 3">
+											<uni-tag :circle="true" text="进行中" type="success" size="small" />
+										</template>
+										<template v-if="cell.state == 4">
+											<uni-tag :circle="true" text="已结束" type="error" size="small" />
+										</template>
+										<template v-if="cell.state == 5">
+											<uni-tag :circle="true" text="已招满" type="error" size="small" />
+										</template>
+									</view>
 								</view>
 								<view class="d-flex justify-content-between align-items-center mt-1">
 									<view class="d-flex align-items-center">
@@ -242,10 +262,33 @@
 			
 			// banner跳转详情
 			bannerDetail(item){
-				uni.navigateTo({
-					// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
-					url: "/pages/index/bannerDetail/bannerDetail?id=" + item.id,
-				})
+				// 跳转地址:
+				// 如果type为1时url不为空则跳转，url为空根据content不为空跳新页面；
+				// 如果type为2此字段不作为跳转依据，如果content不为空，则跳新页面;
+				// 如果url和congtent都为空，不做任何跳转
+				let to_url = '';
+				if(item.url){
+					to_url = item.url.split('#')[1];
+				}
+				if(item.type == 1){
+					if(item.url){
+						uni.navigateTo({
+							url: to_url,
+						})
+					}else if(item.content){
+						uni.navigateTo({
+							// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+							url: "/pages/index/bannerDetail/bannerDetail?id=" + item.id,
+						})
+					}
+				}else if(item.type == 2){
+					if(item.content){
+						uni.navigateTo({
+							// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+							url: "/pages/index/bannerDetail/bannerDetail?id=" + item.id,
+						})
+					}
+				}
 			},
 			
 			// 广告位点击事件

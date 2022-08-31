@@ -12,12 +12,26 @@
 							placeholder="提现方式"
 						></uni-data-select>
 					</uni-forms-item>
-					<uni-forms-item label=" ">
-						<uni-data-select
-							v-model="withdrawalForm.account"
-							:localdata="accountOptions"
-							placeholder="账号"
-						></uni-data-select>
+					<uni-forms-item label=" " v-if="withdrawalForm.type">
+						<template v-if="withdrawalForm.type == 2">
+							<uni-data-select
+								v-model="withdrawalForm.account"
+								:localdata="accountOptions"
+								placeholder="账号"
+							></uni-data-select>
+						</template>
+						<template v-else>
+							<uni-row :gutter="15">
+								<uni-col :span="12" v-for="(account,index) in accountOptions">
+									<view :class="['mb-1 accountItem px-3 py-2',withdrawalForm.account == account.value?'active':'']" @click="changeAccount(account)">
+										<text>{{ account.name }}</text>
+										<view class="d-flex mt-2">
+											<image class="image signcode-image" :src="account.image" mode="aspectFit" style="width:100px;height:100px" />
+										</view>
+									</view>
+								</uni-col>
+							</uni-row>
+						</template>
 					</uni-forms-item>
 					<uni-forms-item label=" ">
 						<uni-easyinput v-model="withdrawalForm.amount" placeholder="提现金额" />
@@ -84,12 +98,14 @@
 		data() {
 			return {
 				withdrawalForm:{
-					type:2,
+					type:"",
 					account:"",
 					amount:"",
 				},
 				typeOptions: [
+					{ value: 1, text: "支付宝" },
 					{ value: 2, text: "银行卡" },
+					{ value: 3, text: "微信" },
 				],
 				tips:"",
 				accountOptions: [],
@@ -105,7 +121,6 @@
 		onShow(){
 			this.getBalance();
 			this.initDeposit();
-			this.initBankCardList(2);
 		},
 		methods: {
 			goBack() {
@@ -134,6 +149,11 @@
 						});
 					}
 				});
+			},
+			
+			// 切换选择的账号
+			changeAccount(item){
+				this.withdrawalForm.account = item.value
 			},
 			
 			// 订阅
@@ -175,9 +195,12 @@
 						this.accountOptions = res.data.map((item,index)=>{
 							return {
 								text: item.code_num + '（' + item.name  + '）',
-								value: item.id
+								value: item.id,
+								name: item.name,
+								image: this.$globalUrl.baseUrl + item.image,
 							}
 						});
+						this.withdrawalForm.account = this.accountOptions[0].value
 					}else{
 						uni.showToast({
 							title: res.msg,
@@ -247,6 +270,7 @@
 											account:"",
 											amount:"",
 										};
+										this.accountOptions = [];
 										this.getBalance();
 										uni.navigateBack({
 											success: () => {

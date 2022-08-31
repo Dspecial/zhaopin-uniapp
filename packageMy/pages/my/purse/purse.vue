@@ -34,7 +34,7 @@
 				<view class="d-flex justify-content-between align-items-center purse-list-item pt-3 pb-3" @click="goBankcard()">
 					<view class="d-flex align-items-center">
 						<image class="image" :src="purseListIcon2" mode="aspectFit" style="width:29rpx;height:29rpx" />
-						<text class="ml-3 fs_14">我的银行卡</text>
+						<text class="ml-3 fs_14">我的提现账号</text>
 					</view>
 					<view>
 						<uni-icons type="right" size="14"></uni-icons>

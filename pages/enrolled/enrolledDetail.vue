@@ -85,6 +85,17 @@
 				</view>
 			</view>
 			
+			<!-- 招聘方信息 -->
+			<view class="info-box p-3 mt-2">
+				<text class="d-block fs_15 box-title pb-3-1">招聘方信息</text>
+				<view class="mt-3-1">
+					<view class="d-flex align-items-center">
+						<image class="image avatar-image" :src="info.cm_image" mode="aspectFit" />
+						<text class="ml-2">{{ info.cm_name}}</text>
+					</view>
+				</view>
+			</view>
+			
 			<!-- 签到记录 -->
 			<!-- 审核成功的时候会有签到记录 -->
 			<view class="info-box p-3 mt-2" v-if="info.is_check == 3">
@@ -218,6 +229,9 @@
 					tel:"",
 					ewmImg:"",
 					
+					cm_image:"",
+					cm_name:"",
+					
 					is_check:"",
 				},
 				// 流程
@@ -299,6 +313,18 @@
 						this.info.contact = res.data.info.truename;
 						this.info.tel = res.data.info.mobile;
 						this.info.ewmImg = this.$globalUrl.baseUrl + res.data.info.codeimage;
+						
+						// 招聘方信息
+						if( res.data.info.cm_image ){
+							if(res.data.info.cm_image.indexOf("http") >= 0){
+								this.info.cm_image = res.data.info.cm_image;
+							}else{
+								this.info.cm_image = this.$globalUrl.baseUrl + res.data.info.cm_image;
+							}
+						}else{
+							this.info.cm_image = require("@/static/default_avatar.png")
+						}
+						this.info.cm_name = res.data.info.cm_name;
 						
 						// 签到记录
 						this.signRecords = res.data.sgin_record_list;

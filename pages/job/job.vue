@@ -23,9 +23,29 @@
 								{{ cell.brief }}
 							</view>
 							<view class="footer">
-								<view class="">
-									<uni-icons type="calendar-filled" size="14"></uni-icons>
-									<text class="fs_11 ml-1">{{ cell.startdate }} - {{ cell.enddate }}</text>
+								<view class="d-flex justify-content-between align-items-center">
+									<view>
+										<uni-icons type="calendar-filled" size="14"></uni-icons>
+										<text class="fs_11 ml-1">{{ cell.startdate }} - {{ cell.enddate }}</text>
+									</view>
+									<view class="my-1">
+										<!-- 1=已停招  2=报名中  3=进行中 4=已结束 5=已招满 -->
+										<template v-if="cell.state == 1">
+											<uni-tag :circle="true" text="已停招" type="error" size="small" />
+										</template>
+										<template v-if="cell.state == 2">
+											<uni-tag :circle="true" text="报名中" type="primary" size="small" />
+										</template>
+										<template v-if="cell.state == 3">
+											<uni-tag :circle="true" text="进行中" type="success" size="small" />
+										</template>
+										<template v-if="cell.state == 4">
+											<uni-tag :circle="true" text="已结束" type="error" size="small" />
+										</template>
+										<template v-if="cell.state == 5">
+											<uni-tag :circle="true" text="已招满" type="error" size="small" />
+										</template>
+									</view>
 								</view>
 								<view class="d-flex justify-content-between align-items-center mt-1">
 									<view class="d-flex align-items-center">
