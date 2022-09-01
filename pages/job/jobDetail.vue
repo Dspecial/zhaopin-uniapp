@@ -449,7 +449,7 @@
 			
 			// 订阅和分享
 			enrolled_subscribe_h5(can_sign,job_type){
-				if(can_sign == 1 && job_type != 2){
+				if(can_sign == 1){
 					this.templateId = this.$globalUrl.template_id_enrolled;
 					// wx-open-subscribe 原生绑定点击事件
 					this.$nextTick(() => {
