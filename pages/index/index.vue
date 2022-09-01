@@ -16,7 +16,7 @@
 			<!-- banner -->
 			<uni-swiper-dot class="uni-swiper-dot-box" @clickItem=dotclickItem :info="bannerList" :current="current" :mode="mode"
 				:dots-styles="dotsStyles" field="content">
-				<swiper class="swiper-box" @change="bannerChange" :current="current">
+				<swiper class="swiper-box" @change="bannerChange" :current="current" autoplay="true" interval="3000">
 					<swiper-item v-for="(item, index) in bannerList" :key="index">
 						<view class="swiper-item">
 							<image class="image" :src="item.image" mode="scaleToFill" @click="bannerDetail(item)" />

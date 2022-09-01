@@ -58,7 +58,7 @@
 			</view>
 			
 			<!-- 联系方式 -->
-			<view class="info-box p-3 mt-2" v-if="info.job_type != 2">
+			<view class="info-box p-3 mt-2">
 				<view class="d-flex justify-content-between align-items-center">
 					<view class="w-60">
 						<text class="d-block fs_15 box-title pb-3-1">联系方式</text>
@@ -86,7 +86,7 @@
 			</view>
 			
 			<!-- 报名人员 -->
-			<view class="info-box pt-3 pl-3 pr-3 mt-2 applicant-box" v-if="info.job_type != 2">
+			<view class="info-box pt-3 pl-3 pr-3 mt-2 applicant-box">
 				<text class="d-block fs_15 box-title pb-3-1">{{ applicant.length }}人已报名</text>
 				<scroll-view class="scroll-view_H mt-3-1" scroll-x="true" @scroll="scroll" scroll-left="120">
 					<template v-for="(item,index) in applicant">
@@ -97,8 +97,15 @@
 				</scroll-view>
 			</view>
 			
+			<!-- 跳转第三方页面 -->
+			<view class="applicant-box" v-if="info.job_type == 2 && info.url">
+				<view class="d-flex justify-content-center mt-5">
+					<text class="bg-primary-600 my-btn" @click="jumpPosition()">查看岗位</text>
+				</view>
+			</view>
+			
 			<!-- 操作 -->
-			<view class="info-actions px-2" v-if="info.job_type != 2">
+			<view class="info-actions px-2">
 				<view class="d-flex align-items-center justify-content-between uni-goods-nav">
 					<view class="d-flex text-grey">
 						<view class="text-center mr-3" @click="callPhone">
@@ -127,7 +134,7 @@
 					<view class="w-60">
 						<!-- #ifdef H5 -->
 						<!-- 微信环境 -->
-						<template v-if="isWeChat && can_sign == 1 && info.job_type != 2">
+						<template v-if="isWeChat && can_sign == 1">
 							<wx-open-subscribe :template="templateId" ref="subscribeBtn" class="subscribeBtn_enrolled">
 								<script type="text/wxtag-template" slot="style">
 										<style>
@@ -191,11 +198,6 @@
 				</view>
 			</uni-popup>
 			
-		
-			<!-- 跳转第三方页面 -->
-			<view class="d-flex justify-content-center mt-5" v-if="info.job_type == 2 && info.url">
-				<text class="bg-primary-600 my-btn" @click="jumpPosition()">查看岗位</text>
-			</view>
 		</view>
 		<!-- 返回首页 -->
 		<back-home></back-home>
@@ -242,6 +244,7 @@
 				buttonGroup: {},
 				
 				can_sign: 0, // 0表示已结束 1表示可报名 2表示已报名
+				sign_sn:'', // 有值的时候去签到
 				// 弹窗的内容
 				msgContent:"",
 				dialogCode:"0",
@@ -357,10 +360,11 @@
 						this.collect_id = res.data.collect_id;
 						this.can_collect = res.data.can_collect; // 0 已收藏 1 未收藏
 						
+						this.sign_sn = res.data.sign_sn;
 						// 操作列表-报名情况
-						if(this.info.job_type == 2){ // 长期职位 报名按钮不显示
-							this.buttonGroup = {};
-						}else{
+						// if(this.info.job_type == 2){ // 长期职位 报名按钮不显示
+						// 	this.buttonGroup = {};
+						// }else{
 							this.can_sign = res.data.can_sign; // 0表示已结束 1表示可以报名  2表示已报名
 							if(res.data.can_sign == 0){ // 已结束
 								this.buttonGroup = {
@@ -375,13 +379,42 @@
 									color: '#fff'
 								};
 							}else if(res.data.can_sign == 2){ // 已报名
-								this.buttonGroup = {
-									text: '已报名',
-									backgroundColor: '#999999',
-									color: '#fff'
-								};
+								// 审核状态:1=待支付,2=待审核,3=审核通过,4=审核不通过,5=已取消,6=已离职
+								// 等于3的时候  显示去签到  等于4、5、6就显示上面的 审核报名不通过、报名已取消、已离职  同样可以跳转到详情
+								// 1的时候先不考虑  0的时候就说明这个人没报名 参考sign_sn就行
+								if(res.data.is_check == 2){
+									this.buttonGroup = {
+										text: '等待审核',
+										backgroundColor: '#435AE0',
+										color: '#fff'
+									};
+								}else if(res.data.is_check == 3){
+									this.buttonGroup = {
+										text: '去签到',
+										backgroundColor: '#435AE0',
+										color: '#fff'
+									};
+								}else if(res.data.is_check == 4){
+									this.buttonGroup = {
+										text: '报名审核不通过',
+										backgroundColor: '#999999',
+										color: '#fff'
+									};
+								}else if(res.data.is_check == 5){
+									this.buttonGroup = {
+										text: '报名已取消',
+										backgroundColor: '#999999',
+										color: '#fff'
+									};
+								}else if(res.data.is_check == 6){
+									this.buttonGroup = {
+										text: '已离职',
+										backgroundColor: '#999999',
+										color: '#fff'
+									};
+								}
 							}
-						}
+						// }
 						// #ifdef H5
 						if(this.isWeChat){
 							// 获取微信签名
@@ -676,6 +709,14 @@
 						}
 					});
 					
+				}else if(this.can_sign == 2){
+					// 已报名，并且有6中审核状态，跳转到报名详情页
+					setTimeout(()=>{
+						uni.navigateTo({
+							// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+							url: "/pages/enrolled/enrolledDetail?id=" + this.sign_sn,
+						})
+					},300)
 				}
 			},
 			

@@ -465,6 +465,10 @@
 			height: 324rpx;
 			width: 100%;
 		}
+		.image.member-bg{
+			height: 188rpx;
+			width: 100%;
+		}
 		.profile-content{
 			position: absolute;
 			top:0;
@@ -832,6 +836,18 @@
 	border: 2rpx solid var(--primary);
 }
 
+.noticePopup{
+	background-color: #fff;
+	border-radius: 10rpx;
+	box-sizing: border-box;
+	margin-top:40rpx;
+	.title{
+		background-color: var(--primary);
+		border-radius: 10rpx 10rpx 0 0;
+		color: #fff
+	}
+}
+
 // withdrawalDetail.vue
 .detailList-item .content{
 	border-bottom: 2rpx solid var(--grey-25);
@@ -859,6 +875,10 @@
 		}
 	}
 }
+.multi-btn{
+	background: linear-gradient(90deg, var(--primary-300), var(--primary-600));
+	color: #fff;
+}
 .sign-records{
 	.table-header{
 		border:2rpx solid #ebeef5;
@@ -872,11 +892,25 @@
 	.table-content{
 		border:2rpx solid #ebeef5;
 		border-top:0;
+		.uni-table-cell{
+			>.uni-col{
+				display: flex;
+				.uni-table-tr{
+					width: 100%;
+					height: 100%;
+					box-sizing: border-box;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+			}
+		}
 		.uni-row .uni-col:first-child .uni-table-tr{
 			border-left:0;
 		}
 		uni-view:last-child .uni-row .uni-col .uni-table-tr{
 			border-bottom:0;
+			flex-direction: column;
 		}
 		uni-view:last-child .more-image{
 			border-top:2rpx solid #ebeef5;
@@ -1007,6 +1041,35 @@
 	.uni-easyinput__placeholder-class{
 		font-size: 28rpx!important;
 	}
+}
+
+// 求职者
+.member-info{
+	background-color: #313131;
+	color: #fff;
+	border-radius: 16rpx;
+	position: absolute;
+	top:250rpx;
+	left: 30rpx;
+	right: 30rpx;
+}
+.phone-fixed{
+	position: fixed;
+	bottom: 30rpx;
+	margin: 0 auto;
+	left:0;
+	right: 0;
+	text-align: center;
+}
+.phone-btn{
+	padding: 20rpx 50rpx;
+	border-radius:60rpx;
+	border: 0;
+}
+.image.company_avatar{
+	width: 120rpx;
+	height: 120rpx;
+	border-radius: 50%;
 }
 
 

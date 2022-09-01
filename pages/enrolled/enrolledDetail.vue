@@ -101,9 +101,9 @@
 			<view class="info-box p-3 mt-2" v-if="info.is_check == 3">
 				<view class="box-title d-flex justify-content-between align-items-center pb-3-1">
 					<text class="d-block fs_15">签到记录</text>
-					<view class="d-flex align-items-center">
-						<view class="text-primary-600 mr-2 sign">
-							<uni-icons type="calendar-filled" size="16" color="#435AE0"></uni-icons>
+					<view class="d-flex align-items-center fs_14">
+						<view class="mr-2 sign bg-primary my-btn py-1 px-4">
+							<uni-icons type="calendar-filled" size="16" color="#fff" class="mr-1"></uni-icons>
 							<!-- #ifdef H5 -->
 							<!-- 微信环境 -->
 							<template v-if="isWeChat">
@@ -111,8 +111,8 @@
 									<script type="text/wxtag-template" slot="style">
 											<style>
 													.text {
-														color: #435AE0;
-														font-size:12px;
+														color: #fff;
+														font-size:14px;
 													}
 											</style>
 									</script>
@@ -120,20 +120,20 @@
 										<div class="text">上班签到</div>
 									</script>
 								</wx-open-subscribe> -->
-								<text @click="signInOut(1)">上班签到</text>
+								<text @click="signInOut(1)">签到</text>
 							</template>
 							<template v-else>
-								<text @click="signInOut(1)">上班签到</text>
+								<text @click="signInOut(1)">签到</text>
 							</template>
 							<!-- #endif -->
 							
 							<!-- 非H5 -->
 							<!-- #ifndef H5 -->
-							<text @click="signInOut(1)">上班签到</text>
+							<text @click="signInOut(1)">签到</text>
 							<!-- #endif -->
 						</view>
-						<view class="text-primary-600 sign">
-							<uni-icons type="calendar-filled" size="16" color="#435AE0"></uni-icons>
+						<view class="sign bg-primary my-btn py-1 px-4">
+							<uni-icons type="calendar-filled" size="16" color="#fff" class="mr-1"></uni-icons>
 							<!-- #ifdef H5 -->
 							<!-- 微信环境 -->
 							<template v-if="isWeChat">
@@ -150,16 +150,16 @@
 										<div class="text">下班签退</div>
 									</script>
 								</wx-open-subscribe> -->
-								<text @click="signInOut(2)">下班签退</text>
+								<text @click="signInOut(2)">签退</text>
 							</template>
 							<template v-else>
-								<text @click="signInOut(2)">下班签退</text>
+								<text @click="signInOut(2)">签退</text>
 							</template>
 							<!-- #endif -->
 							
 							<!-- 非H5 -->
 							<!-- #ifndef H5 -->
-							<text @click="signInOut(2)">下班签退</text>
+							<text @click="signInOut(2)">签退</text>
 							<!-- #endif -->
 						</view>
 					</view>

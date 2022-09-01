@@ -407,6 +407,15 @@ export default {
 			data: params, // 请求数据
 		})
 	},
+
+	// 批量审核
+	multiConfirm: (params) => {
+		return request({
+			url: "/api/charger/mutile_confirm", // 请求url
+			method: "POST", // 请求方式
+			data: params, // 请求数据
+		})
+	},
 	
 	// 获取活动详情-签到+报名
 	activitySignList: (params) => {
@@ -448,6 +457,33 @@ export default {
 	activityPay: (params) => {
 		return request({
 			url: "/api/charger/set_sign_record", // 请求url
+			method: "POST", // 请求方式
+			data: params, // 请求数据
+		})
+	},
+	
+	// 获取报名人员的信息（求职者）
+	memberInfo: (params) => {
+		return request({
+			url: "/api/charger/get_member_info", // 请求url
+			method: "POST", // 请求方式
+			data: params, // 请求数据
+		})
+	},
+	
+	// 获取报名人员的活动记录（求职者）
+	memberExerciseList: (params) => {
+		return request({
+			url: "/api/charger/get_member_exercise_list", // 请求url
+			method: "POST", // 请求方式
+			data: params, // 请求数据
+		})
+	},
+	
+	// 获取报名人员的他的评价（求职者）
+	memberEvaluateList: (params) => {
+		return request({
+			url: "/api/charger/get_member_evaluate_list", // 请求url
 			method: "POST", // 请求方式
 			data: params, // 请求数据
 		})

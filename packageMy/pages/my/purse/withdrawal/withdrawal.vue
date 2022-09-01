@@ -22,7 +22,7 @@
 						</template>
 						<template v-else>
 							<uni-row :gutter="15">
-								<uni-col :span="12" v-for="(account,index) in accountOptions">
+								<uni-col :span="12" v-for="(account,index) in accountOptions" :key="index">
 									<view :class="['mb-1 accountItem px-3 py-2',withdrawalForm.account == account.value?'active':'']" @click="changeAccount(account)">
 										<text>{{ account.name }}</text>
 										<view class="d-flex mt-2">
@@ -51,6 +51,20 @@
 					</uni-forms-item>
 				</view>
 			</uni-forms>
+			
+			<!-- 提现须知的弹窗 -->
+			<uni-popup ref="noticePopup" type="dialog">
+				<view class="noticePopup">
+					<text class="d-block fs_18 title px-3 py-2">提现须知</text>
+					<view class="p-3">
+						<view v-html="notice" class="aboutContent"></view>
+						<view class="text-center mt-5">
+							<text @click="close" class="my-btn bg-primary">已知晓</text>
+						</view>
+					</view>
+				</view>
+			</uni-popup>
+			
 			<view class="p-btn">
 				<!-- #ifdef H5 -->
 				<!-- 微信环境 -->
@@ -108,6 +122,7 @@
 					{ value: 3, text: "微信" },
 				],
 				tips:"",
+				notice:"",
 				accountOptions: [],
 				allAmount: "",
 				// 订阅的模板id
@@ -121,6 +136,7 @@
 		onShow(){
 			this.getBalance();
 			this.initDeposit();
+			this.initNotice();
 		},
 		methods: {
 			goBack() {
@@ -226,6 +242,30 @@
 				});
 			},
 			
+			// 获取提现须知
+			initNotice(){
+				this.$api.aboutUs({
+					name: 'deposit_notice',
+				}).then(res=>{
+					if(res.code == 0){
+						this.notice = this.$util.formatRichText(res.data.value);
+						if(this.notice){
+							this.$refs.noticePopup.open();
+						}
+					}else{
+						uni.showToast({
+							title: res.msg,
+							icon: 'none'
+						});
+					}
+				});
+			},
+			
+			// 关闭提现须知
+			close() {
+				this.$refs.noticePopup.close()
+			},
+			
 			// 跳转提现记录
 			goDetail(){
 				uni.navigateTo({
@@ -265,13 +305,6 @@
 										icon: 'success'
 									});
 									setTimeout(()=>{
-										this.withdrawalForm = {
-											type:"",
-											account:"",
-											amount:"",
-										};
-										this.accountOptions = [];
-										this.getBalance();
 										uni.navigateBack({
 											success: () => {
 												let page = getCurrentPages().pop();  //跳转页面成功之后
@@ -288,6 +321,12 @@
 										title: res.msg,
 										icon: 'none'
 									});
+									this.withdrawalForm = {
+										type:"",
+										account:"",
+										amount:"",
+									};
+									this.accountOptions = [];
 								}
 							});
 						} else if (modal_res.cancel) {

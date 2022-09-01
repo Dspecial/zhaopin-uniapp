@@ -108,8 +108,6 @@
 							openTagList: ['wx-open-launch-weapp', 'wx-open-subscribe'],
 						});
 						// 完成签名后，进行分享
-						
-						
 					}else{
 						uni.showToast({
 							title: res.msg,

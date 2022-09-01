@@ -199,6 +199,13 @@
 						"onReachBottomDistance": 0,
 						"enablePullDownRefresh": true
 					}	
+				},
+				{
+					"path" : "pages/my/jobHunterInfo/jobHunterInfo",
+					"style" : {
+						"navigationBarTitleText": "求职者",
+						"enablePullDownRefresh": false
+					}
 				}
 			]
 		}

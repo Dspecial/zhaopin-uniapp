@@ -101,8 +101,9 @@
 				<!-- 日期搜索 -->
 				<view class="d-flex justify-content-end align-items-center mt-2">
 					<text>{{ searchDate }}</text>
-					<uni-datetime-picker type="date" v-model="searchDate" :start="can_startDate" :end="can_endDate" @change="dateChange">
-						<image class="image ml-2" :src="dateImg" mode="aspectFit" style="width: 30rpx;height:30rpx" />
+					<uni-datetime-picker type="date" v-model="searchDate" 
+						:start="can_startDate" :end="can_endDate" @change="dateChange">
+						<image class="image ml-2" :src="dateImg" mode="aspectFit" style="width: 40rpx;height:40rpx" />
 					</uni-datetime-picker>
 				</view>
 				
@@ -118,14 +119,18 @@
 				
 				<!-- 全局功能 -->
 				<view class="d-flex mt-2">
-					<view class="my-btn bg-primary-600 px-3 py-1 d-flex align-items-center" @click="multiSignPop()">
+					<view class="multi-btn my-btn px-3 py-1 d-flex align-items-center" @click="multiSignPop()">
 						<uni-icons type="calendar-filled" size="16" color="#ffffff"></uni-icons>
 						<text class="ml-1">一键签到</text>
 					</view>
-					<view class="my-btn bg-primary-600 px-3 py-1 d-flex align-items-center ml-2" @click="allSort(orderType)">
+					<view class="multi-btn my-btn px-3 py-1 d-flex align-items-center ml-2" @click="allSort(orderType)">
 						<uni-icons type="list" size="16" color="#ffffff"></uni-icons>
 						<text class="ml-1" v-if="orderType == 1">正序</text>
 						<text class="ml-1" v-else-if="orderType == 2">倒序</text>
+					</view>
+					<view class="multi-btn my-btn px-3 py-1 d-flex align-items-center ml-2" @click="multiConfirm()">
+						<uni-icons type="checkbox-filled" size="16" color="#ffffff"></uni-icons>
+						<text class="ml-1">批量审核</text>
 					</view>
 				</view>
 				
@@ -141,8 +146,8 @@
 									<!-- <image class="image avatar" :src="list.avatar" mode="scaleToFill"/> -->
 								</view>
 								<view class="ml-2">
-									<text class="d-block">{{ list.truename }}</text>
-									<text class="d-block">
+									<text class="d-block cursor-pointer" @click="goHunterInfo(list)">{{ list.truename }}</text>
+									<text class="d-block cursor-pointer" @click="goHunterInfo(list)">
 										<text v-if="list.sex == 1">性别：未知</text>
 										<text v-else-if="list.sex == 2">性别：男</text>
 										<text v-else-if="list.sex == 3">性别：女</text>
@@ -200,7 +205,7 @@
 									<template v-else>
 										<view v-for="(record, re_index) in list.record_list" :key="re_index" @click="showMore(re_index)">
 											<uni-row>
-												<view class="d-flex">
+												<view class="d-flex uni-table-cell">
 													<uni-col :span="11">
 														<view class="text-center p-2 uni-table-tr">{{ record.date }}</view>
 													</uni-col>
@@ -224,6 +229,7 @@
 													</uni-col>
 													<uni-col :span="7" v-if="list.is_check == 3">
 														<view class="text-center p-2 uni-table-tr">
+															<view :class="[record.is_send != 1?'text-danger':'']">{{ record.money }}</view>
 															<text class="fs_12 text-primary-600" @click="setPay(list,record)">设置工资</text>
 														</view>
 													</uni-col>
@@ -291,6 +297,27 @@
 							</uni-forms>
 							<view class="text-center pt-5 pb-5">
 								<text class="my-btn bg-primary-600 fs_13" @click="multiSignInOut_replace()">一键签到</text>
+							</view>
+						</uni-section>
+					</view>
+				</uni-popup>
+				
+				<!-- 批量审核的pop -->
+				<uni-popup ref="multiConfirmPopup" @change="multiConfirmPopupChange" :safe-area="false">
+					<view class="bg-white signPopup">
+						<uni-section title="批量审核" type="line">
+							<uni-forms :modelValue="multiConfirmForm" label-position="top">
+								<view class="px-3">
+									<uni-forms-item label="审核日期" name="date">
+										<uni-data-select v-model="multiConfirmForm.date" :clear="false" 
+											:localdata="dateOptions"
+											placeholder="请选择签到日期">
+										</uni-data-select>
+									</uni-forms-item>
+								</view>
+							</uni-forms>
+							<view class="text-center pt-5 pb-5">
+								<text class="my-btn bg-primary-600 fs_13" @click="multiConfirm_examine()">批量审核</text>
 							</view>
 						</uni-section>
 					</view>
@@ -500,6 +527,10 @@
 					},
 				],
 				dateOptions:[],
+				// 批量审核
+				multiConfirmForm:{
+					date:"",
+				},
 				// 评价
 				evaluateForm:{
 					evaluateId:"",
@@ -736,6 +767,7 @@
 			
 			// 搜索
 			search(){
+				this.initPersonNum(this.sn);
 				this.loadStatus = "more";
 				this.currentPage = 1;
 				this.pageSize = 10;
@@ -880,6 +912,56 @@
 					this.orderType = '1';
 				};
 				this.initSign(this.sn,this.activeTab,this.orderType);
+			},
+			
+			// 批量审核的弹窗打开
+			multiConfirm(){
+				this.$refs.multiConfirmPopup.open('bottom');
+			},
+			
+			// 批量审核弹窗状态改变
+			multiConfirmPopupChange(e){
+				if(!e.show){
+					this.multiConfirmForm = {
+						date:"",
+					};
+				}
+			},
+			
+			// 批量审核提交
+			multiConfirm_examine(){
+				uni.showModal({
+					title: '温馨提示',
+					content: '请确认是否对已选日期进行批量审核',
+					confirmText: '确定',
+					cancelText: '取消',
+					success: (modal_res) => {
+						if (modal_res.confirm) {
+							// 调代替签到的接口-批量签到
+							this.$api.multiConfirm({
+								token:uni.getStorageSync('user_token'),
+								sn:this.sn,
+								date:this.multiConfirmForm.date,
+							}).then(res=>{
+								if(res.code == 0){
+									uni.showToast({
+										title: res.msg,
+										icon: 'success'
+									});
+									this.$refs.multiConfirmPopup.close();
+									this.search();
+								}else{
+									uni.showToast({
+										title: res.msg,
+										icon: 'none'
+									});
+								}
+							});
+						} else if (modal_res.cancel) {
+							console.log('关闭');
+						}
+					}
+				});
 			},
 			
 			// 签到的弹窗打开
@@ -1173,6 +1255,14 @@
 			// 查看签到码
 			showSignCode(){
 				this.$refs.signCodePopup.open();
+			},
+			
+			// 去求职者信息页面
+			goHunterInfo(item){
+				uni.navigateTo({
+					// 保留当前页面，跳转到应用内的某个页面,使用uni.navigateBack可以返回到原页面
+					url: "/packageMy/pages/my/jobHunterInfo/jobHunterInfo?sn=" + this.sn + "&signcode=" + item.signcode,
+				})
 			},
 		},
 		
